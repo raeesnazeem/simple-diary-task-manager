@@ -53,8 +53,9 @@ export default function GlobalSearch() {
 
     const searchQuery = query.toLowerCase();
     const foundResults: SearchResult[] = [];
+    const safeData = data || {};
 
-    Object.entries(data).forEach(([dateString, blocks]) => {
+    Object.entries(safeData).forEach(([dateString, blocks]) => {
       blocks.forEach(block => {
         if (block.content && block.content.toLowerCase().includes(searchQuery)) {
           foundResults.push({
@@ -107,7 +108,7 @@ export default function GlobalSearch() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] font-inter">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"

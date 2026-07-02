@@ -8,8 +8,19 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        caveat: ['var(--font-caveat)'],
-        inter: ['var(--font-inter)'],
+        caveat: ['var(--font-caveat)', 'cursive'],
+        kalam: ['var(--font-kalam)', 'cursive'],
+        inter: ['var(--font-inter)', 'sans-serif'],
+        architects: ['var(--font-architects)', 'cursive'],
+        'instrument-sans': ['var(--font-instrument-sans)', 'sans-serif'],
+        figtree: ['var(--font-figtree)', 'sans-serif'],
+        urbanist: ['var(--font-urbanist)', 'sans-serif'],
+        'instrument-serif': ['var(--font-instrument-serif)', 'serif'],
+        newsreader: ['var(--font-newsreader)', 'serif'],
+        'plus-jakarta': ['var(--font-plus-jakarta)', 'sans-serif'],
+        'geist-mono': ['Geist Mono', 'monospace'],
+        charter: ['Charter', 'Bitstream Charter', 'serif'],
+        'sn-pro': ['SN Pro', 'sans-serif'],
       },
       colors: {
         paper: {

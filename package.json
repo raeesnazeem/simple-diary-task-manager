@@ -4,11 +4,11 @@
   "description": "Minimalistic Desktop Diary and Task Manager",
   "main": "main.js",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3004",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:dev": "concurrently \"next dev -p 3004\" \"wait-on http://localhost:3004 && electron .\"",
     "electron:build": "npm run build && electron-builder --publish always",
     "postinstall": "electron-builder install-app-deps"
   },

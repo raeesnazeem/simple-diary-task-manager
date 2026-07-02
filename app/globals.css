@@ -4,7 +4,7 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 245, 245, 245; /* Neutral gray */
+  --background-start-rgb: 245, 245, 245;
   --background-end-rgb: 245, 245, 245;
 }
 
@@ -17,13 +17,120 @@ body {
 /* Paper styling */
 .paper-canvas {
   background-color: #fdfbf7;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-/* Content Editable placeholder styling */
-[contenteditable]:empty:before {
-  content: attr(data-placeholder);
-  color: #a0aec0;
+.paper-canvas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/pattern.avif");
+  background-repeat: repeat;
+  opacity: 0.15;
   pointer-events: none;
-  display: block; /* For Firefox */
+  border-radius: inherit;
+}
+
+/* Content Editable placeholder — only when the block actually has focus */
+[contenteditable]:focus:empty:before {
+  content: attr(data-placeholder);
+  color: #c4c9d4;
+  pointer-events: none;
+  display: block;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 0.9em;
+  font-weight: 400;
+}
+
+/* ─── Realistic 3D page-turn ──────────────────────────────────────────── */
+
+/* Forward: page lifts from right, folds over to the left */
+@keyframes pageTurnForward {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(-180deg);
+  }
+}
+
+/* Backward: page lifts from left, unfolds back to the right */
+@keyframes pageTurnBackward {
+  0% {
+    transform: rotateY(-180deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+/* Fold-crease shadow sweeps across the base page (forward) */
+@keyframes shadowSweepForward {
+  0% {
+    transform: translateX(30%);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(-130%);
+    opacity: 0;
+  }
+}
+
+/* Fold-crease shadow sweeps across the base page (backward) */
+@keyframes shadowSweepBackward {
+  0% {
+    transform: translateX(-130%);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.7;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(30%);
+    opacity: 0;
+  }
+}
+
+/* Gentle dim over the base page while the turning page passes */
+@keyframes baseDim {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Quick fade in for content appearing after a turn */
+@keyframes quickFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-quick-fade {
+  animation: quickFadeIn 0.3s ease-out forwards;
 }

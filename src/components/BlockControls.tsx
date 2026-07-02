@@ -23,7 +23,7 @@ export default function BlockControls({ block, onUpdate }: BlockControlsProps) {
   ];
 
   return (
-    <div className="absolute right-0 top-0 -mt-10 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center p-1 gap-1 z-20 font-inter opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+    <div className="absolute right-0 top-0 -mt-10 bg-white border border-gray-200 rounded-lg shadow-lg flex items-center p-1 gap-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
 
       {/* Colors */}
       <div className="flex gap-1 border-r border-gray-200 pr-1">

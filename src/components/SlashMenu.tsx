@@ -54,7 +54,7 @@ export default function SlashMenu({ query, onSelect, onClose }: SlashMenuProps) 
   if (filteredItems.length === 0) return null;
 
   return (
-    <div className="absolute left-0 top-full mt-1 w-72 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50 font-inter">
+    <div className="absolute left-0 top-full mt-1 w-72 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
       <div className="px-3 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
         Basic Blocks
       </div>

@@ -13,8 +13,17 @@ export interface Block {
   color?: BlockColor;
   size?: BlockSize;
   checked?: boolean; // For todo items
+  width?: number; // Custom width for images
 }
 
 export interface DiaryData {
   [dateString: string]: Block[];
+}
+
+declare global {
+  interface Window {
+    electronAPI: {
+      saveImage: (buffer: ArrayBuffer, extension: string) => Promise<string>;
+    };
+  }
 }

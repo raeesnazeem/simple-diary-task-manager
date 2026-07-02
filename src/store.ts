@@ -1,13 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { format } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 import { Block, BlockType, DiaryData } from './types';
 
 interface DiaryState {
   data: DiaryData;
   activeDate: string;
   setActiveDate: (date: string) => void;
+  fontFamily: string;
+  setFontFamily: (font: string) => void;
+  viewMode: 'single' | 'double';
+  setViewMode: (mode: 'single' | 'double') => void;
   addBlock: (date: string, type: BlockType, content?: string, index?: number) => void;
   updateBlock: (date: string, id: string, updates: Partial<Block>) => void;
   deleteBlock: (date: string, id: string) => void;
@@ -16,7 +19,7 @@ interface DiaryState {
 }
 
 const createNewBlock = (type: BlockType, content: string = ''): Block => ({
-  id: uuidv4(),
+  id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15),
   type,
   content,
   timestamp: format(new Date(), 'HH:mm'),
@@ -30,7 +33,11 @@ export const useDiaryStore = create<DiaryState>()(
     (set) => ({
       data: {},
       activeDate: format(new Date(), 'yyyy-MM-dd'),
+      fontFamily: 'font-inter',
+      viewMode: 'single',
       setActiveDate: (date) => set({ activeDate: date }),
+      setFontFamily: (font) => set({ fontFamily: font }),
+      setViewMode: (mode) => set({ viewMode: mode }),
 
       addBlock: (date, type, content = '', index) => set((state) => {
         const blocks = state.data[date] || [createNewBlock('text')];
@@ -121,6 +128,14 @@ export const useDiaryStore = create<DiaryState>()(
     }),
     {
       name: 'simple-diary-storage',
+      merge: (persistedState: any, currentState: DiaryState) => {
+        return {
+          ...currentState,
+          ...persistedState,
+          data: persistedState?.data || currentState.data,
+          activeDate: persistedState?.activeDate || currentState.activeDate,
+        };
+      },
     }
   )
 );
