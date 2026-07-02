@@ -1,1 +1,1 @@
-#Diary and Task Manager
+#Diary and Task Manager for Mac
