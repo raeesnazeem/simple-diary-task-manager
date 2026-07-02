@@ -31,7 +31,7 @@ jobs:
           NEXT_PUBLIC_STATIC_EXPORT: true
 
       - name: Package Electron App & Publish Release
-        run: npm run electron:build -- --publish always
+        run: npm run electron:build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ELECTRON_BUILDER_ALLOW_UNCONFIGURED_MACOS_SIGNING: true
