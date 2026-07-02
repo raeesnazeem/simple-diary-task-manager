@@ -1,12 +1,9 @@
-name: Build and Release Electron App
+name: Build and Release Desktop App
 
 on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,19 +13,25 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build & Publish Electron App
+      - name: Build Next.js Export
+        run: npm run build
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: true
+
+      - name: Package Electron App & Publish Release
         run: npm run electron:build -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ELECTRON_BUILDER_ALLOW_UNCONFIGURED_MACOS_SIGNING: true

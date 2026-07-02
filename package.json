@@ -12,27 +12,27 @@
     "electron:build": "npm run build && electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raeesnazeem/simple-diary-task-manager.git"
+  },
   "build": {
-    "appId": "com.simplediary.app",
-    "productName": "Simple Diary",
-    "directories": {
-      "output": "dist_electron"
-    },
+    "appId": "com.raeesnazeem.simplediary",
+    "files": [
+      "main.js",
+      "out/**/*"
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
         "dmg"
       ]
     },
-    "publish": [
-      {
-        "provider": "github"
-      }
-    ],
-    "files": [
-      "main.js",
-      "out/**/*"
-    ]
+    "publish": {
+      "provider": "github",
+      "owner": "raeesnazeem",
+      "repo": "simple-diary-task-manager"
+    }
   },
   "dependencies": {
     "date-fns": "^3.3.1",

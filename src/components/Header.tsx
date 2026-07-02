@@ -75,7 +75,7 @@ export default function Header() {
 
         <div className="flex items-center space-x-2 text-xs text-green-600 font-medium">
           <Cloud size={14} />
-          <span>Synced with [User Email]</span>
+          <span>Synced locally</span>
         </div>
       </div>
     </header>
