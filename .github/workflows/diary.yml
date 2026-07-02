@@ -23,7 +23,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Next.js Export
         run: npm run build
@@ -31,7 +31,7 @@ jobs:
           NEXT_PUBLIC_STATIC_EXPORT: true
 
       - name: Package Electron App & Publish Release
-        run: npm run electron:build
+        run: npm run electron:build -- --publish always
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ELECTRON_BUILDER_ALLOW_UNCONFIGURED_MACOS_SIGNING: true
