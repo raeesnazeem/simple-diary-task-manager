@@ -18,25 +18,21 @@
   },
   "build": {
     "appId": "com.raeesnazeem.simplediary",
-    "mac": {
-      "target": "dmg"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "raeesnazeem",
-      "repo": "simple-diary-task-manager"
-    }
-  },
+    "files": [
+      "main.js",
+      "out/**/*"
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
         "dmg"
       ]
     },
-    "files": [
-      "main.js",
-      "out/**/*"
-    ]
+    "publish": {
+      "provider": "github",
+      "owner": "raeesnazeem",
+      "repo": "simple-diary-task-manager"
+    }
   },
   "dependencies": {
     "date-fns": "^3.3.1",
