@@ -1,4 +1,4 @@
-export type BlockType = 'text' | 'heading-1' | 'heading-2' | 'heading-3' | 'todo' | 'image';
+export type BlockType = 'text' | 'heading-1' | 'heading-2' | 'heading-3' | 'todo' | 'image' | 'code' | 'draw' | 'audio';
 
 export type BlockAlign = 'left' | 'center' | 'right';
 export type BlockColor = 'default' | 'gray' | 'red' | 'blue' | 'green';
@@ -13,7 +13,8 @@ export interface Block {
   color?: BlockColor;
   size?: BlockSize;
   checked?: boolean; // For todo items
-  width?: number; // Custom width for images
+  width?: number; // Custom width for images and canvas
+  height?: number; // Custom height for canvas
 }
 
 export interface DiaryData {

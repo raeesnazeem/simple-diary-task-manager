@@ -7,9 +7,10 @@ import GlobalSearch from "../src/components/GlobalSearch"
 import { useDiaryStore } from "../src/store"
 import { format, addDays, subDays, parseISO } from "date-fns"
 import { useEffect, useState, useRef } from "react"
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react"
 
 export default function Home() {
-  const { viewMode, activeDate, setActiveDate } = useDiaryStore();
+  const { viewMode, activeDate, setActiveDate, isRecordingAudio, setPendingPageTurn, setActiveBlockId } = useDiaryStore();
 
   const safeActiveDate = activeDate || format(new Date(), 'yyyy-MM-dd');
   const nextDate = format(addDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd');
@@ -18,6 +19,21 @@ export default function Home() {
   const [delayedLeftDate, setDelayedLeftDate] = useState(safeActiveDate);
   const prevDateRef = useRef(safeActiveDate);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const leftScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeftBy = (amount: number) => {
+    if (leftScrollRef.current) {
+      leftScrollRef.current.scrollBy({ top: amount, behavior: 'smooth' });
+    }
+  };
+
+  const handleDateChange = (newDate: string) => {
+    if (isRecordingAudio) {
+      setPendingPageTurn(newDate);
+    } else {
+      setActiveDate(newDate);
+    }
+  };
 
   useEffect(() => {
     if (safeActiveDate === prevDateRef.current) return;
@@ -57,21 +73,22 @@ export default function Home() {
         if (isInput) {
           (activeEl as HTMLElement).blur();
         }
+        setActiveBlockId(null);
         return;
       }
 
       if (isInput) return;
 
       if (e.key === 'ArrowRight') {
-        setActiveDate(format(addDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'));
+        handleDateChange(format(addDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'));
       } else if (e.key === 'ArrowLeft') {
-        setActiveDate(format(subDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'));
+        handleDateChange(format(subDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'));
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [safeActiveDate, setActiveDate]);
+  }, [safeActiveDate, setActiveDate, isRecordingAudio, setPendingPageTurn]);
 
   return (
     <div 
@@ -80,6 +97,7 @@ export default function Home() {
         // Blur active element if clicking outside the paper canvas (e.g. on the grey background)
         if (!(e.target as HTMLElement).closest('.paper-canvas')) {
           (document.activeElement as HTMLElement)?.blur();
+          setActiveBlockId(null);
         }
       }}
     >
@@ -97,29 +115,70 @@ export default function Home() {
         <Header />
 
         {viewMode === 'single' ? (
-          <main className="flex-1 overflow-y-auto overflow-x-hidden w-full py-12 px-4 scroll-smooth">
+          <main className="flex-1 overflow-hidden w-full py-12 px-4 flex items-center justify-center relative group">
+            <button
+              onClick={() => handleDateChange(format(subDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'))}
+              className="absolute left-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
+              title="Previous Day"
+            >
+              <ChevronLeft size={32} />
+            </button>
             <PageWithTurn
               date={safeActiveDate}
-              className="mx-auto w-full max-w-6xl paper-canvas min-h-[85vh] rounded-xl"
-              contentClassName="p-10 md:p-16 lg:p-20"
+              className="w-full max-w-3xl h-[85vh] rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.10)]"
+              contentClassName="paper-canvas p-10 md:p-16 lg:p-20 overflow-y-auto h-full w-full rounded-[inherit]"
             />
+            <button
+              onClick={() => handleDateChange(format(addDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'))}
+              className="absolute right-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
+              title="Next Day"
+            >
+              <ChevronRight size={32} />
+            </button>
           </main>
         ) : (
-          <main className="flex-1 overflow-hidden w-full py-10 px-8 flex items-start justify-center">
+          <main className="flex-1 overflow-hidden w-full py-10 px-8 flex items-center justify-center relative group">
+            <button
+              onClick={() => handleDateChange(format(subDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'))}
+              className="absolute left-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
+              title="Previous Day"
+            >
+              <ChevronLeft size={32} />
+            </button>
             {/* Book wrapper — two pages joined at center */}
             <div
-              className="flex w-[95vw] max-w-[1600px] min-h-[85vh] rounded-xl overflow-hidden"
+              className="flex w-[95vw] max-w-[1600px] h-[85vh] rounded-xl overflow-hidden"
               style={{
                 boxShadow: '0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10)',
               }}
             >
               {/* Left page — active date (no animation, just swaps) */}
-              <div
-                key={delayedLeftDate}
-                className="flex-1 paper-canvas relative p-10 md:p-14 lg:p-16 overflow-y-auto animate-quick-fade"
-                style={{ borderRadius: '0.75rem 0 0 0.75rem' }}
-              >
-                <BlockEditor date={delayedLeftDate} />
+              <div className="flex-1 relative group overflow-hidden" style={{ borderRadius: '0.75rem 0 0 0.75rem' }}>
+                {/* ── Scroll Overlays ─────────────────────────────────────────── */}
+                <div className="absolute top-0 left-0 right-0 h-[25%] z-20 flex items-start justify-center pt-8 opacity-0 hover:opacity-100 hover:bg-gradient-to-b from-black/[0.04] to-transparent transition-all duration-150 pointer-events-none">
+                  <button
+                    onClick={() => scrollLeftBy(-400)}
+                    className="p-3 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.1)] text-gray-600 hover:text-black hover:bg-gray-50 hover:shadow-[0_4px_14px_rgba(0,0,0,0.15)] hover:scale-105 active:scale-95 transition-all pointer-events-auto"
+                  >
+                    <ChevronUp size={28} strokeWidth={2.5} />
+                  </button>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 h-[25%] z-20 flex items-end justify-center pb-8 opacity-0 hover:opacity-100 hover:bg-gradient-to-t from-black/[0.04] to-transparent transition-all duration-150 pointer-events-none">
+                  <button
+                    onClick={() => scrollLeftBy(400)}
+                    className="p-3 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.1)] text-gray-600 hover:text-black hover:bg-gray-50 hover:shadow-[0_4px_14px_rgba(0,0,0,0.15)] hover:scale-105 active:scale-95 transition-all pointer-events-auto"
+                  >
+                    <ChevronDown size={28} strokeWidth={2.5} />
+                  </button>
+                </div>
+
+                <div
+                  ref={leftScrollRef}
+                  key={delayedLeftDate}
+                  className="paper-canvas relative p-10 md:p-14 lg:p-16 overflow-y-auto animate-quick-fade h-full w-full no-scrollbar"
+                >
+                  <BlockEditor date={delayedLeftDate} />
+                </div>
               </div>
 
               {/* Realistic Center Crease / Spine Shadow */}
@@ -133,11 +192,18 @@ export default function Home() {
               {/* Right page — next day (page-turn animation) */}
               <PageWithTurn
                 date={nextDate}
-                className="flex-1 paper-canvas"
-                contentClassName="p-10 md:p-14 lg:p-16"
+                className="flex-1 h-[85vh]"
+                contentClassName="paper-canvas p-10 md:p-14 lg:p-16 overflow-y-auto h-full w-full"
                 style={{ borderRadius: '0 0.75rem 0.75rem 0' }}
               />
             </div>
+            <button
+              onClick={() => handleDateChange(format(addDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'))}
+              className="absolute right-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
+              title="Next Day"
+            >
+              <ChevronRight size={32} />
+            </button>
           </main>
         )}
       </div>

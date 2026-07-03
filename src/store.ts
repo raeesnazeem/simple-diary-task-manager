@@ -11,6 +11,12 @@ interface DiaryState {
   setFontFamily: (font: string) => void;
   viewMode: 'single' | 'double';
   setViewMode: (mode: 'single' | 'double') => void;
+  activeBlockId: string | null;
+  setActiveBlockId: (id: string | null) => void;
+  isRecordingAudio: boolean;
+  setIsRecordingAudio: (isRecording: boolean) => void;
+  pendingPageTurn: string | null;
+  setPendingPageTurn: (date: string | null) => void;
   addBlock: (date: string, type: BlockType, content?: string, index?: number) => void;
   updateBlock: (date: string, id: string, updates: Partial<Block>) => void;
   deleteBlock: (date: string, id: string) => void;
@@ -35,9 +41,15 @@ export const useDiaryStore = create<DiaryState>()(
       activeDate: format(new Date(), 'yyyy-MM-dd'),
       fontFamily: 'font-inter',
       viewMode: 'single',
-      setActiveDate: (date) => set({ activeDate: date }),
+      activeBlockId: null,
+      isRecordingAudio: false,
+      pendingPageTurn: null,
+      setActiveDate: (date) => set({ activeDate: date, activeBlockId: null }),
       setFontFamily: (font) => set({ fontFamily: font }),
       setViewMode: (mode) => set({ viewMode: mode }),
+      setActiveBlockId: (id) => set({ activeBlockId: id }),
+      setIsRecordingAudio: (val) => set({ isRecordingAudio: val }),
+      setPendingPageTurn: (date) => set({ pendingPageTurn: date }),
 
       addBlock: (date, type, content = '', index) => set((state) => {
         const blocks = state.data[date] || [createNewBlock('text')];

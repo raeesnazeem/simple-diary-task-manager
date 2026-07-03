@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import BlockEditor from './BlockEditor';
 import { parseISO } from 'date-fns';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface PageWithTurnProps {
   /** The date this page should display */
@@ -43,6 +44,13 @@ export default function PageWithTurn({
 
   const prevDateRef = useRef(date);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollByAmount = (amount: number) => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ top: amount, behavior: 'smooth' });
+    }
+  };
 
   /* ── Trigger animation when `date` prop changes ────────────────────── */
   useEffect(() => {
@@ -99,11 +107,29 @@ export default function PageWithTurn({
 
   return (
     <div
-      className={`${className} relative`}
+      className={`${className} relative group overflow-hidden`}
       style={{ ...style, perspective: '2000px' }}
     >
+      {/* ── Scroll Overlays ─────────────────────────────────────────── */}
+      <div className="absolute top-0 left-0 right-0 h-[25%] z-20 flex items-start justify-center pt-8 opacity-0 hover:opacity-100 hover:bg-gradient-to-b from-black/[0.04] to-transparent transition-all duration-150 pointer-events-none">
+        <button
+          onClick={() => scrollByAmount(-400)}
+          className="p-3 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.1)] text-gray-600 hover:text-black hover:bg-gray-50 hover:shadow-[0_4px_14px_rgba(0,0,0,0.15)] hover:scale-105 active:scale-95 transition-all pointer-events-auto"
+        >
+          <ChevronUp size={28} strokeWidth={2.5} />
+        </button>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 h-[25%] z-20 flex items-end justify-center pb-8 opacity-0 hover:opacity-100 hover:bg-gradient-to-t from-black/[0.04] to-transparent transition-all duration-150 pointer-events-none">
+        <button
+          onClick={() => scrollByAmount(400)}
+          className="p-3 rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,0.1)] text-gray-600 hover:text-black hover:bg-gray-50 hover:shadow-[0_4px_14px_rgba(0,0,0,0.15)] hover:scale-105 active:scale-95 transition-all pointer-events-auto"
+        >
+          <ChevronDown size={28} strokeWidth={2.5} />
+        </button>
+      </div>
+
       {/* ── Base page (always visible) ──────────────────────────────── */}
-      <div className={`relative z-[1] ${contentClassName}`}>
+      <div ref={scrollRef} className={`relative z-[1] ${contentClassName} no-scrollbar`}>
         <BlockEditor date={visibleDate} />
       </div>
 
@@ -154,7 +180,7 @@ export default function PageWithTurn({
           >
             {/* Front face — shows diary content */}
             <div
-              className={`absolute inset-0 paper-canvas overflow-hidden rounded-[inherit] ${contentClassName}`}
+              className={`absolute inset-0 paper-canvas overflow-hidden rounded-[inherit] ${contentClassName} no-scrollbar`}
               style={{
                 backfaceVisibility: 'hidden',
                 // Subtle shadow on the lifting edge
