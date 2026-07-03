@@ -12,6 +12,7 @@ body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-start-rgb));
   min-height: 100vh;
+  overflow: hidden;
 }
 
 /* Hide scrollbar for pages but keep functionality */
@@ -178,4 +179,16 @@ body {
 .animate-scale-pulse {
   animation: scalePulse 0.75s ease-in-out infinite;
   transform-origin: center;
+}
+
+/* Globally scale down the fixed layout to fit gracefully across all devices */
+main {
+  zoom: 0.75;
+}
+
+/* Slightly larger scale for 2K resolutions and above */
+@media (min-width: 2000px) {
+  main {
+    zoom: 1;
+  }
 }

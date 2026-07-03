@@ -84,7 +84,7 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
 
   const blocks = safeData[safeActiveDate] || []
 
-  const hasReminder = false
+  const hasReminder = blocks.some((b) => b.type === "reminder")
   const hasBookmark = false
   const hasImage = blocks.some((b) => b.type === "image")
   const hasAudio = blocks.some((b) => b.type === "audio")

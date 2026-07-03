@@ -5,6 +5,7 @@ import BlockEditor from "../src/components/BlockEditor"
 import PageWithTurn from "../src/components/PageWithTurn"
 import GlobalSearch from "../src/components/GlobalSearch"
 import CalendarModal from "../src/components/CalendarModal"
+import ReminderModal from "../src/components/ReminderModal"
 import { useDiaryStore } from "../src/store"
 import { format, addDays, subDays, parseISO } from "date-fns"
 import { useEffect, useState, useRef } from "react"
@@ -22,7 +23,9 @@ export default function Home() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const leftScrollRef = useRef<HTMLDivElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const notifiedRemindersRef = useRef<Set<string>>(new Set());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
 
   const scrollLeftBy = (amount: number) => {
     if (leftScrollRef.current) {
@@ -88,6 +91,12 @@ export default function Home() {
         return;
       }
 
+      if (e.altKey && (e.key.toLowerCase() === 'r' || e.code === 'KeyR' || e.key === '®')) {
+        e.preventDefault();
+        setIsReminderOpen(true);
+        return;
+      }
+
       if (e.key === 'ArrowRight') {
         handleDateChange(format(addDays(parseISO(safeActiveDate), viewMode === 'double' ? 2 : 1), 'yyyy-MM-dd'));
       } else if (e.key === 'ArrowLeft') {
@@ -98,6 +107,81 @@ export default function Home() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [safeActiveDate, setActiveDate, isRecordingAudio, setPendingPageTurn, viewMode]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const state = useDiaryStore.getState();
+      const now = new Date();
+      const currentDateString = format(now, 'yyyy-MM-dd');
+      const currentTimeString = format(now, 'HH:mm');
+      const currentDayOfWeek = now.getDay();
+      const currentDayOfMonth = now.getDate();
+
+      Object.values(state.data).forEach(blocks => {
+        blocks.forEach(block => {
+          if (block.type === 'reminder' && block.content) {
+            try {
+              const details = JSON.parse(block.content);
+              let shouldNotify = false;
+
+              const isPastOrToday = new Date(currentDateString) >= new Date(details.date);
+
+              if (isPastOrToday) {
+                if (details.date === currentDateString) {
+                  shouldNotify = true;
+                } else if (details.repeat === 'daily') {
+                  shouldNotify = true;
+                } else if (details.repeat === 'weekly' && new Date(details.date).getDay() === currentDayOfWeek) {
+                  shouldNotify = true;
+                } else if (details.repeat === 'monthly' && new Date(details.date).getDate() === currentDayOfMonth) {
+                  shouldNotify = true;
+                }
+              }
+
+              if (shouldNotify && details.time === currentTimeString) {
+                const notifyKey = `${block.id}-${currentDateString}-${currentTimeString}`;
+                if (!notifiedRemindersRef.current.has(notifyKey)) {
+                  notifiedRemindersRef.current.add(notifyKey);
+                  if (typeof window !== 'undefined' && 'Notification' in window) {
+                    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+                    const audioCtx = new AudioContextClass();
+                    
+                    const playBeep = () => {
+                      if (audioCtx.state === 'suspended') {
+                        audioCtx.resume().catch(console.error);
+                      }
+                      try {
+                        const oscillator = audioCtx.createOscillator();
+                        oscillator.connect(audioCtx.destination);
+                        oscillator.frequency.value = 800;
+                        oscillator.start();
+                        oscillator.stop(audioCtx.currentTime + 0.2);
+                      } catch (e) {
+                        console.error('Beep failed', e);
+                      }
+                    };
+
+                    const beepInterval = setInterval(playBeep, 1000);
+                    playBeep(); // Play immediately once
+
+                    const notif = new Notification(details.title || 'Reminder', {
+                      body: details.description || '',
+                      requireInteraction: true
+                    });
+                    
+                    notif.onclick = () => { clearInterval(beepInterval); if (audioCtx.state !== 'closed') audioCtx.close(); };
+                    notif.onclose = () => { clearInterval(beepInterval); if (audioCtx.state !== 'closed') audioCtx.close(); };
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+        });
+      });
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div 
@@ -124,7 +208,7 @@ export default function Home() {
         <Header />
 
         {viewMode === 'single' ? (
-          <main className="flex-1 overflow-hidden w-full py-12 px-4 flex items-center justify-center relative group" style={{ overflow: 'auto' }}>
+          <main className="flex-1 overflow-hidden w-full py-12 px-4 flex items-center justify-center relative group">
             <button
               onClick={() => handleDateChange(format(subDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'))}
               className="absolute left-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
@@ -147,7 +231,7 @@ export default function Home() {
             </button>
           </main>
         ) : (
-          <main className="flex-1 overflow-hidden w-full py-10 px-8 flex items-center justify-center relative group" style={{ overflow: 'auto' }}>
+          <main className="flex-1 overflow-hidden w-full py-10 px-8 flex items-center justify-center relative group">
             <button
               onClick={() => handleDateChange(format(subDays(parseISO(safeActiveDate), 2), 'yyyy-MM-dd'))}
               className="absolute left-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
@@ -225,6 +309,18 @@ export default function Home() {
         onClose={() => setIsCalendarOpen(false)} 
         onSelectDate={handleDateChange} 
         currentDate={safeActiveDate} 
+      />
+      <ReminderModal
+        isOpen={isReminderOpen}
+        onClose={() => setIsReminderOpen(false)}
+        currentDate={safeActiveDate}
+        onSave={(details) => {
+          // Add it as a new block in the selected date
+          useDiaryStore.getState().addBlock(details.date, 'reminder', JSON.stringify(details));
+          if (details.date !== safeActiveDate) {
+            handleDateChange(details.date);
+          }
+        }}
       />
       <input 
         type="date" 
