@@ -115,7 +115,7 @@ export default function Home() {
         <Header />
 
         {viewMode === 'single' ? (
-          <main className="flex-1 overflow-hidden w-full py-12 px-4 flex items-center justify-center relative group">
+          <main className="flex-1 overflow-hidden w-full py-12 px-4 flex items-center justify-center relative group" style={{ overflow: 'auto' }}>
             <button
               onClick={() => handleDateChange(format(subDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'))}
               className="absolute left-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
@@ -126,6 +126,7 @@ export default function Home() {
             <PageWithTurn
               date={safeActiveDate}
               className="w-full max-w-3xl h-[85vh] rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.10)]"
+              style={{ minWidth: '768px', minHeight: '1105px', maxWidth: '768px', maxHeight: '1105px', flexShrink: 0 }}
               contentClassName="paper-canvas p-10 md:p-16 lg:p-20 overflow-y-auto h-full w-full rounded-[inherit]"
             />
             <button
@@ -137,7 +138,7 @@ export default function Home() {
             </button>
           </main>
         ) : (
-          <main className="flex-1 overflow-hidden w-full py-10 px-8 flex items-center justify-center relative group">
+          <main className="flex-1 overflow-hidden w-full py-10 px-8 flex items-center justify-center relative group" style={{ overflow: 'auto' }}>
             <button
               onClick={() => handleDateChange(format(subDays(parseISO(safeActiveDate), 2), 'yyyy-MM-dd'))}
               className="absolute left-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
@@ -150,6 +151,7 @@ export default function Home() {
               className="flex w-[95vw] max-w-[1600px] h-[85vh] rounded-xl overflow-hidden"
               style={{
                 boxShadow: '0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10)',
+                minWidth: '1536px', minHeight: '1105px', maxWidth: '1536px', maxHeight: '1105px', flexShrink: 0
               }}
             >
               {/* Left page — active date (no animation, just swaps) */}
@@ -194,7 +196,7 @@ export default function Home() {
                 date={nextDate}
                 className="flex-1 h-[85vh]"
                 contentClassName="paper-canvas p-10 md:p-14 lg:p-16 overflow-y-auto h-full w-full"
-                style={{ borderRadius: '0 0.75rem 0.75rem 0' }}
+                style={{ borderRadius: '0 0.75rem 0.75rem 0', height: '100%' }}
               />
             </div>
             <button
