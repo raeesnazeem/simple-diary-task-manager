@@ -86,7 +86,7 @@ export default function Header() {
   if (!mounted) return null
 
   return (
-    <div className="h-14 w-full border-b border-gray-200 bg-[#F9F9FB]/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0 shadow-sm z-10 sticky top-0">
+    <div className="h-14 w-full border-b border-gray-200 bg-[#F9F9FB]/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0 shadow-sm z-10 sticky top-0" style={{ minHeight: '64px' }}>
       {/* Left: date navigation */}
       <div className="flex items-center space-x-4">
         <div className="flex items-center bg-gray-50 rounded-md overflow-hidden">
@@ -122,7 +122,7 @@ export default function Header() {
       </div>
 
       {/* Right: controls */}
-      <div className="flex items-center space-x-6">
+      <div className="flex items-center space-x-6" style={{ transform: 'scale(1.1)', transformOrigin: 'right center' }}>
         {/* Search shortcut */}
         <button
           className="flex items-center space-x-2 text-gray-400 hover:text-gray-600 transition-colors group"
@@ -224,6 +224,10 @@ export default function Header() {
           <Cloud size={14} />
           <span>Synced locally</span>
         </div>
+        <button className="flex items-center space-x-1.5 text-xs text-gray-500 hover:text-gray-800 bg-white border border-gray-200 px-2.5 py-1.5 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
+          <Cloud size={14} />
+          <span>Sync to Google Drive</span>
+        </button>
       </div>
     </div>
   )
