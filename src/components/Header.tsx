@@ -8,6 +8,7 @@ import {
   Cloud,
   Search,
   Settings,
+  HelpCircle,
 } from "lucide-react"
 import { format, addDays, subDays, parseISO } from "date-fns"
 
@@ -51,6 +52,7 @@ export default function Header() {
   } = useDiaryStore()
   const [mounted, setMounted] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showHelpOverlay, setShowHelpOverlay] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "success" | "error">("idle")
   const settingsRef = useRef<HTMLDivElement>(null)
@@ -59,7 +61,24 @@ export default function Header() {
 
   useEffect(() => {
     setMounted(true)
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowHelpOverlay(false) }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
   }, [])
+
+  useEffect(() => {
+    if (!showHelpOverlay) return
+    const handleClickAnywhere = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      // Don't close if clicking the help toggle button or a help icon tooltip
+      if (!target.closest('.help-toggle-btn') && !target.closest('.help-mode-icons')) {
+        setShowHelpOverlay(false)
+      }
+    }
+    // Use capture phase to ensure it runs before React synthetic events might stop propagation
+    document.addEventListener('mousedown', handleClickAnywhere, { capture: true })
+    return () => document.removeEventListener('mousedown', handleClickAnywhere, { capture: true })
+  }, [showHelpOverlay])
 
   useEffect(() => {
     if (mounted && autoSyncEnabled) {
@@ -158,18 +177,41 @@ export default function Header() {
 
       {/* Right: controls */}
       <div className="flex items-center space-x-6" style={{ transform: 'scale(1.1)', transformOrigin: 'right center' }}>
+        {/* Help shortcut */}
+        <div className="relative group/icon flex">
+          <button
+            onClick={() => setShowHelpOverlay(!showHelpOverlay)}
+            className="flex items-center text-gray-400 hover:text-gray-600 transition-all duration-200 group h-7 help-toggle-btn"
+            title="Help"
+          >
+            <HelpCircle size={16} className="group-hover:scale-110 transition-transform duration-200" />
+          </button>
+          {showHelpOverlay && (
+            <div className="hidden group-hover/icon:flex absolute right-0 top-full mt-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Toggle Help Mode
+            </div>
+          )}
+        </div>
+
         {/* Search shortcut */}
-        <button
-          className="flex items-center text-gray-400 hover:text-gray-600 transition-all duration-200 group h-7"
-          title="Search (Cmd+F)"
-        >
-          <Search size={16} className="group-hover:scale-110 transition-transform duration-200" />
-        </button>
+        <div className="relative group/icon flex">
+          <button
+            className="flex items-center text-gray-400 hover:text-gray-600 transition-all duration-200 group h-7"
+            title="Search (Cmd+F)"
+          >
+            <Search size={16} className="group-hover:scale-110 transition-transform duration-200" />
+          </button>
+          {showHelpOverlay && (
+            <div className="hidden group-hover/icon:flex absolute right-0 top-full mt-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Search across your entire diary
+            </div>
+          )}
+        </div>
 
         {/* Sync Controls Group */}
-        <div className="flex items-center space-x-2">
+        <div className="relative group/icon flex items-center space-x-2">
           {/* Sync status */}
-          <div className="flex items-center space-x-1.5 text-[11px] text-green-600 font-medium bg-green-50/80 px-3 h-7 rounded-full border border-green-300 shadow-sm">
+          <div title="save to your system" className="peer/pill flex items-center space-x-1.5 text-[11px] text-green-600 font-medium bg-green-50/80 px-3 h-7 rounded-full border border-green-300 shadow-sm">
             <Cloud size={14} className="text-green-500" />
             <span>Synced locally</span>
           </div>
@@ -177,7 +219,8 @@ export default function Header() {
           <button 
             onClick={handleManualSync}
             disabled={isSyncing}
-            className={`flex items-center space-x-1.5 text-[11px] font-semibold px-3 h-7 rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.05)] border transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
+            title="sync data to your google drive"
+            className={`peer/btn flex items-center space-x-1.5 text-[11px] font-semibold px-3 h-7 rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.05)] border transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
               syncStatus === "success" 
                 ? "bg-green-50 border-green-400 text-green-700" 
                 : syncStatus === "error"
@@ -190,10 +233,21 @@ export default function Header() {
               {syncStatus === "syncing" ? "Syncing..." : syncStatus === "success" ? "Synced to Drive!" : syncStatus === "error" ? "Sync Failed" : "Sync to Google Drive"}
             </span>
           </button>
+          
+          {showHelpOverlay && (
+            <div className="hidden peer-hover/pill:flex absolute left-0 top-full mt-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              save to your system
+            </div>
+          )}
+          {showHelpOverlay && (
+            <div className="hidden peer-hover/btn:flex absolute right-0 top-full mt-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              sync data to your google drive
+            </div>
+          )}
         </div>
 
         {/* Settings Dropdown */}
-        <div className="relative flex items-center h-7">
+        <div className="relative group/icon flex items-center h-7">
           <button
             onClick={() => {
               if (!showSettings) {
@@ -206,6 +260,12 @@ export default function Header() {
           >
             <Settings size={16} />
           </button>
+          
+          {showHelpOverlay && (
+            <div className="hidden group-hover/icon:flex absolute right-0 top-full mt-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Change fonts, layouts, and sync settings
+            </div>
+          )}
 
           {showSettings && (
             <>
@@ -293,6 +353,35 @@ export default function Header() {
           )}
         </div>
       </div>
+
+      {showHelpOverlay && typeof document !== 'undefined' && document.body && require('react-dom').createPortal(
+        <div className="fixed inset-0 z-[100] pointer-events-none">
+          <style>{`
+            .help-mode-icons { pointer-events: auto !important; }
+            .help-mode-icons > div { cursor: help; }
+            @keyframes slideInUpPaper {
+              from { transform: translateY(-30px); opacity: 0; }
+              to { transform: translateY(0); opacity: 1; }
+            }
+            .animate-slide-in-up-paper { animation: slideInUpPaper 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+          `}</style>
+          <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+          <div className={`absolute inset-0 pointer-events-none ${fontFamily} text-sm font-medium tracking-wide`}>
+            
+            <div className="absolute top-24 left-10 flex flex-col gap-3 paper-canvas p-6 rounded-lg shadow-2xl animate-slide-in-up-paper border border-gray-100/50">
+              <span className="text-gray-800 text-lg mb-2 font-bold font-sans">Shortcuts</span>
+              <div className="flex items-center gap-4"><span className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-sans text-xs font-semibold shadow-sm border border-gray-200/50">Cmd + F</span><span className="text-gray-600 font-sans">Search</span></div>
+              <div className="flex items-center gap-4"><span className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-sans text-xs font-semibold shadow-sm border border-gray-200/50">Cmd + G</span><span className="text-gray-600 font-sans">Go to date</span></div>
+              <div className="flex items-center gap-4"><span className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-sans text-xs font-semibold shadow-sm border border-gray-200/50">Left / Right</span><span className="text-gray-600 font-sans">Turn pages</span></div>
+            </div>
+            
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center text-xl animate-pulse text-white drop-shadow-lg border-t border-white/10 font-figtree">
+              <span>Hover over each icon to see what it does!</span>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

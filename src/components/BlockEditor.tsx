@@ -4,7 +4,15 @@ import React, { useEffect, useState } from "react"
 import { useDiaryStore } from "../store"
 import BlockNode from "./BlockNode"
 import { format, parseISO } from "date-fns"
-import { Clock, Image as ImageIcon, Music, Bookmark, Youtube, CheckSquare, Code } from "lucide-react"
+import {
+  Clock,
+  Image as ImageIcon,
+  Music,
+  Bookmark,
+  Youtube,
+  CheckSquare,
+  Code,
+} from "lucide-react"
 
 interface BlockEditorProps {
   date?: string // If provided, renders this date instead of activeDate
@@ -41,17 +49,19 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
     ) {
       addBlock(safeActiveDate, "text")
     }
-    
+
     if (mounted && safeActiveDate) {
       const saved = localStorage.getItem(`edited-${safeActiveDate}`)
       setEditedText(saved ? saved : null)
-      const savedBlockId = localStorage.getItem(`edited-blockId-${safeActiveDate}`)
+      const savedBlockId = localStorage.getItem(
+        `edited-blockId-${safeActiveDate}`,
+      )
       setEditedBlockId(savedBlockId ? savedBlockId : null)
     }
   }, [safeActiveDate, mounted, safeData, addBlock])
 
   const recordEdit = (blockId?: string) => {
-    const todayStr = format(new Date(), 'yyyy-MM-dd')
+    const todayStr = format(new Date(), "yyyy-MM-dd")
     if (safeActiveDate < todayStr) {
       const timeStr = `edited - on ${format(new Date(), "MMM d, yyyy 'and' h:mm a")}`
       localStorage.setItem(`edited-${safeActiveDate}`, timeStr)
@@ -83,7 +93,6 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
   const todoBlocks = blocks.filter((b) => b.type === "todo")
   const hasTodo = todoBlocks.length > 0
   const hasUncheckedTodo = todoBlocks.some((b) => !b.checked)
-
 
   const handleKeyDownDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key === "ArrowUp" && index > 0) {
@@ -159,48 +168,103 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
             app
           </span>
         </div>
-        
-        <div className="absolute bottom-4 left-0 flex gap-3 pointer-events-none select-none">
-          <Clock 
-            size={16} 
-            strokeWidth={2} 
-            className={hasReminder ? "text-purple-500" : "text-gray-400 opacity-50"} 
-          />
-          <ImageIcon 
-            size={16} 
-            strokeWidth={2} 
-            className={hasImage ? "text-blue-500" : "text-gray-400 opacity-50"} 
-          />
-          <Music 
-            size={16} 
-            strokeWidth={2} 
-            className={hasAudio ? "text-black" : "text-gray-400 opacity-50"} 
-          />
-          <Bookmark 
-            size={16} 
-            strokeWidth={2} 
-            className={hasBookmark ? "text-amber-800" : "text-gray-400 opacity-50"}
-            fill={hasBookmark ? "currentColor" : "none"}
-          />
-          <Youtube 
-            size={16} 
-            strokeWidth={2} 
-            className={hasYoutube ? "text-red-500" : "text-gray-400 opacity-50"} 
-          />
-          <CheckSquare
-            size={16}
-            strokeWidth={2}
-            className={
-              hasTodo 
-                ? (hasUncheckedTodo ? "text-yellow-500 animate-scale-pulse" : "text-yellow-500") 
-                : "text-gray-400 opacity-50"
-            }
-          />
-          <Code 
-            size={16} 
-            strokeWidth={2} 
-            className={hasCode ? "text-green-500" : "text-gray-400 opacity-50"} 
-          />
+
+        <div className="absolute bottom-4 left-0 flex gap-3 pointer-events-none select-none help-mode-icons">
+          <div className="relative group/icon">
+            <Clock
+              size={16}
+              strokeWidth={2}
+              className={
+                hasReminder ? "text-purple-500" : "text-gray-400 opacity-50"
+              }
+            />
+            <div className="hidden group-hover/icon:flex absolute left-0 bottom-full mb-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Indicates a reminder is set for this date
+            </div>
+          </div>
+
+          <div className="relative group/icon">
+            <ImageIcon
+              size={16}
+              strokeWidth={2}
+              className={
+                hasImage ? "text-blue-500" : "text-gray-400 opacity-50"
+              }
+            />
+            <div className="hidden group-hover/icon:flex absolute left-0 bottom-full mb-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Indicates images are present in the page
+            </div>
+          </div>
+
+          <div className="relative group/icon">
+            <Music
+              size={16}
+              strokeWidth={2}
+              className={hasAudio ? "text-black" : "text-gray-400 opacity-50"}
+            />
+            <div className="hidden group-hover/icon:flex absolute left-0 bottom-full mb-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Indicates audio recordings are present in the page
+            </div>
+          </div>
+
+          <div className="relative group/icon">
+            <Bookmark
+              size={16}
+              strokeWidth={2}
+              className={
+                hasBookmark ? "text-amber-800" : "text-gray-400 opacity-50"
+              }
+              fill={hasBookmark ? "currentColor" : "none"}
+            />
+            <div className="hidden group-hover/icon:flex absolute left-0 bottom-full mb-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Indicates that the page is bookmarked if highlghted
+            </div>
+          </div>
+
+          <div className="relative group/icon">
+            <Youtube
+              size={16}
+              strokeWidth={2}
+              className={
+                hasYoutube ? "text-red-500" : "text-gray-400 opacity-50"
+              }
+            />
+            <div className="hidden group-hover/icon:flex absolute left-0 bottom-full mb-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Indicates video embeds are present in the page
+            </div>
+          </div>
+
+          <div className="relative group/icon">
+            <CheckSquare
+              size={16}
+              strokeWidth={2}
+              className={
+                hasTodo
+                  ? hasUncheckedTodo
+                    ? "text-yellow-500 animate-scale-pulse"
+                    : "text-yellow-500"
+                  : "text-gray-400 opacity-50"
+              }
+            />
+            <div className="hidden group-hover/icon:flex absolute left-0 bottom-full mb-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              - Indicates to-do lists are present in the page.
+              <br /> - Pulsing indicates there are incomplete items.
+              <br /> - Golden Yellow indicates all tasks completed.
+            </div>
+          </div>
+
+          <div className="relative group/icon">
+            <Code
+              size={16}
+              strokeWidth={2}
+              className={
+                hasCode ? "text-green-500" : "text-gray-400 opacity-50"
+              }
+            />
+            <div className="hidden group-hover/icon:flex absolute left-0 bottom-full mb-2 bg-white border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg whitespace-nowrap shadow-xl z-[9999] font-figtree">
+              Indicates code snippets are present in the page
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col items-end pb-4 pr-2 select-none font-sans pointer-events-none">
@@ -224,45 +288,45 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
               updateBlock(safeActiveDate, id, updates)
               recordEdit(id)
             }}
-          onAddBlock={(type, idx, content = "") => {
-            addBlock(safeActiveDate, type, content, idx)
-            recordEdit()
-            // We can't immediately set activeBlockId because the block isn't rendered yet,
-            // but it'll be handled by the effect inside BlockNode ideally, or by relying on tab order.
-            // For a perfect implementation, we'd wait for render and focus.
-            setTimeout(() => {
-              const newBlocks = useDiaryStore.getState().data[safeActiveDate]
-              if (newBlocks && newBlocks[idx])
-                setActiveBlockId(newBlocks[idx].id)
-            }, 0)
-          }}
-          onDelete={(id) => {
-            deleteBlock(safeActiveDate, id)
-            recordEdit()
-            if (index > 0) {
-              setActiveBlockId(blocks[index - 1].id)
-            }
-          }}
-          onMergeWithPrev={(idx) => {
-            mergeBlockWithPrevious(safeActiveDate, idx)
-            recordEdit()
-            setActiveBlockId(blocks[idx - 1].id)
-          }}
-          onFocus={(id) => setActiveBlockId(id)}
-          onKeyDownDown={handleKeyDownDown}
-          draggedIndex={draggedIndex}
-          setDraggedIndex={setDraggedIndex}
-          onReorder={(sourceIdx, destIdx) => {
-            reorderBlocks(safeActiveDate, sourceIdx, destIdx)
-            recordEdit()
-          }}
-        />
-        {editedBlockId === block.id && editedText && (
-          <div className="font-figtree text-xs text-amber-700 italic bg-amber-50/80 backdrop-blur-sm py-1 px-3 rounded-full shadow-sm border border-amber-200/60 pointer-events-none select-none self-end -mt-3 mr-4 z-10 transition-all opacity-100">
-            {editedText}
-          </div>
-        )}
-      </React.Fragment>
+            onAddBlock={(type, idx, content = "") => {
+              addBlock(safeActiveDate, type, content, idx)
+              recordEdit()
+              // We can't immediately set activeBlockId because the block isn't rendered yet,
+              // but it'll be handled by the effect inside BlockNode ideally, or by relying on tab order.
+              // For a perfect implementation, we'd wait for render and focus.
+              setTimeout(() => {
+                const newBlocks = useDiaryStore.getState().data[safeActiveDate]
+                if (newBlocks && newBlocks[idx])
+                  setActiveBlockId(newBlocks[idx].id)
+              }, 0)
+            }}
+            onDelete={(id) => {
+              deleteBlock(safeActiveDate, id)
+              recordEdit()
+              if (index > 0) {
+                setActiveBlockId(blocks[index - 1].id)
+              }
+            }}
+            onMergeWithPrev={(idx) => {
+              mergeBlockWithPrevious(safeActiveDate, idx)
+              recordEdit()
+              setActiveBlockId(blocks[idx - 1].id)
+            }}
+            onFocus={(id) => setActiveBlockId(id)}
+            onKeyDownDown={handleKeyDownDown}
+            draggedIndex={draggedIndex}
+            setDraggedIndex={setDraggedIndex}
+            onReorder={(sourceIdx, destIdx) => {
+              reorderBlocks(safeActiveDate, sourceIdx, destIdx)
+              recordEdit()
+            }}
+          />
+          {editedBlockId === block.id && editedText && (
+            <div className="font-figtree text-xs text-amber-700 italic bg-amber-50/80 backdrop-blur-sm py-1 px-3 rounded-full shadow-sm border border-amber-200/60 pointer-events-none select-none self-end -mt-3 mr-4 z-10 transition-all opacity-100">
+              {editedText}
+            </div>
+          )}
+        </React.Fragment>
       ))}
     </div>
   )
