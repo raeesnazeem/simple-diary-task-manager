@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { temporal } from 'zundo';
 
 
 const electronStorage = {
@@ -59,8 +60,9 @@ const createNewBlock = (type: BlockType, content: string = ''): Block => ({
 });
 
 export const useDiaryStore = create<DiaryState>()(
-  persist(
-    (set) => ({
+  temporal(
+    persist(
+      (set) => ({
       data: {},
       activeDate: format(new Date(), 'yyyy-MM-dd'),
       fontFamily: 'font-inter',
@@ -174,5 +176,6 @@ export const useDiaryStore = create<DiaryState>()(
         };
       },
     }
+  ), { limit: 50 }
   )
 );

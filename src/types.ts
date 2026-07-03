@@ -1,4 +1,4 @@
-export type BlockType = 'text' | 'heading-1' | 'heading-2' | 'heading-3' | 'todo' | 'image' | 'code' | 'draw' | 'audio';
+export type BlockType = 'text' | 'heading-1' | 'heading-2' | 'heading-3' | 'todo' | 'image' | 'code' | 'draw' | 'audio' | 'video-embed';
 
 export type BlockAlign = 'left' | 'center' | 'right';
 export type BlockColor = 'default' | 'gray' | 'red' | 'blue' | 'green';

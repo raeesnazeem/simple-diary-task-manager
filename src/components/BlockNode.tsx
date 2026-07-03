@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Block, BlockType } from '../types';
 import { CheckSquare, Square, GripVertical, Plus, Image as ImageIcon, Undo2, Eraser, Pen, Trash2, Mic, Play, Pause } from 'lucide-react';
 import BlockControls from './BlockControls';
@@ -48,6 +49,11 @@ export default function BlockNode({
   const [slashSearch, setSlashSearch] = useState('');
   const [imageWidth, setImageWidth] = useState<number | undefined>(block.width);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [isDragHandleActive, setIsDragHandleActive] = useState(false);
   const [dropPosition, setDropPosition] = useState<'top' | 'bottom' | null>(null);
 
@@ -216,16 +222,16 @@ export default function BlockNode({
     // Check if cursor is at the beginning
     const isAtStart = window.getSelection()?.focusOffset === 0;
 
-    if (block.type === 'image' || block.type === 'draw' || block.type === 'audio') {
+    if (block.type === 'image' || block.type === 'draw' || block.type === 'audio' || block.type === 'video-embed') {
       if (e.key === 'Enter') {
          e.preventDefault();
          onAddBlock('text', index + 1);
       } else if (e.key === 'Backspace' || e.key === 'Delete') {
          e.preventDefault();
-         if (block.content === '' || block.content === '[]') {
-           onDelete(block.id);
+         if (block.content && block.content !== '[]') {
+            setShowDeleteModal(true);
          } else {
-           setShowDeleteModal(true);
+            onDelete(block.id);
          }
       } else {
          onKeyDownDown(e, index);
@@ -264,6 +270,9 @@ export default function BlockNode({
         e.preventDefault();
         onMergeWithPrev(index);
       }
+    } else if (e.key === 'Delete' && text === '') {
+      e.preventDefault();
+      onDelete(block.id);
     } else if (e.key === 'Escape') {
       setShowSlashMenu(false);
     } else {
@@ -396,17 +405,18 @@ export default function BlockNode({
     }
 
     // Strip HTML formatting for text-based blocks
-    if (!['image', 'draw', 'audio', 'code'].includes(block.type)) {
+    if (!['image', 'draw', 'audio', 'code', 'video-embed'].includes(block.type)) {
       const textData = e.clipboardData.getData('text/plain');
       if (textData) {
         e.preventDefault();
-        // Convert plain text to HTML, preserving line breaks and double spaces
+        // Convert plain text to HTML, preserving line breaks and double spaces, and auto-linking URLs
         const htmlData = textData
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
           .replace(/\n/g, '<br>')
-          .replace(/  /g, ' &nbsp;');
+          .replace(/  /g, ' &nbsp;')
+          .replace(/(https?:\/\/[^\s<]+)/g, '<b><a href="$1" target="_blank" rel="noopener noreferrer" class="underline cursor-pointer">$1</a></b>');
         document.execCommand('insertHTML', false, htmlData);
       }
     }
@@ -590,7 +600,7 @@ export default function BlockNode({
 
   return (
     <div 
-      className={`group relative flex items-start -ml-12 pl-12 pr-4 py-1 hover:bg-black/[0.02] focus-within:bg-black/[0.03] rounded-lg transition-all 
+      className={`group relative flex items-start -ml-16 pl-16 pr-4 py-1 hover:bg-black/[0.02] focus-within:bg-black/[0.03] rounded-lg transition-all 
         ${draggedIndex === index ? 'opacity-30' : ''}
       `}
       draggable={isDragHandleActive}
@@ -640,14 +650,14 @@ export default function BlockNode({
       {dropPosition === 'bottom' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500 rounded-full z-50 pointer-events-none" />}
 
       {/* Absolute Timestamp margin */}
-      <div className={`absolute left-0 top-3 text-[10px] text-gray-300 transition-opacity select-none w-10 text-right pr-2 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`hidden absolute left-0 top-3 text-[10px] text-gray-300 transition-opacity select-none w-10 text-right pr-2 font-figtree ${isActive ? 'opacity-100' : 'opacity-0'}`}>
         {block.timestamp}
       </div>
 
       {/* Block Controls Margin */}
-      <div className={`absolute left-6 top-2.5 transition-opacity flex flex-col gap-1 z-10 ${isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`absolute left-0 top-2.5 transition-opacity flex flex-row gap-1 z-10 font-figtree ${isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button
-          className="text-gray-300 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+          className="text-gray-400 hover:text-gray-700 cursor-grab active:cursor-grabbing"
           title="Drag to move"
           onMouseEnter={() => setIsDragHandleActive(true)}
           onMouseLeave={() => setIsDragHandleActive(false)}
@@ -655,9 +665,9 @@ export default function BlockNode({
           <GripVertical size={16} />
         </button>
         <button
-          className="text-gray-300 hover:text-red-500"
+          className="text-gray-400 hover:text-red-500"
           onClick={() => {
-            if (block.type === 'text' && (!block.content || block.content.trim() === '')) {
+            if ((block.type === 'text' && (!block.content || block.content.trim() === '')) || (block.type !== 'text' && (!block.content || block.content === '[]'))) {
               onDelete(block.id); // fast delete for empty lines
             } else {
               setShowDeleteModal(true);
@@ -668,7 +678,7 @@ export default function BlockNode({
           <Trash2 size={16} />
         </button>
         <button
-          className="text-gray-300 hover:text-gray-600"
+          className="text-gray-400 hover:text-gray-700"
           onClick={() => onAddBlock('text', index + 1)}
           title="Add block below"
         >
@@ -750,7 +760,7 @@ export default function BlockNode({
 
             {/* Page Turn Intercept Modal */}
             {pendingPageTurn && isRecording && !isPaused && (
-              <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/20 backdrop-blur-sm pointer-events-auto">
+              <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/20 backdrop-blur-sm pointer-events-auto font-figtree">
                 <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Recording in Progress</h3>
                   <p className="text-gray-500 text-sm mb-6">You are actively recording an audio note. Would you like to save or discard it before turning the page?</p>
@@ -897,6 +907,78 @@ export default function BlockNode({
               </>
             )}
           </div>
+        ) : block.type === 'video-embed' ? (
+          <div className="w-full relative mt-2 mb-4 group/video outline-none" tabIndex={0} onKeyDown={handleKeyDown} onFocus={() => onFocus(block.id)}>
+            {block.content ? (
+              <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={(() => {
+                    try {
+                      const data = JSON.parse(block.content);
+                      let url = data.url;
+                      let videoId = '';
+                      if (url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
+                      else if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
+                      let src = `https://www.youtube.com/embed/${videoId}?`;
+                      if (data.from) src += `start=${data.from}&`;
+                      if (data.to) src += `end=${data.to}&`;
+                      return src;
+                    } catch(e) {
+                      return block.content;
+                    }
+                  })()}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+                {!isActive && (
+                  <div 
+                    className="absolute inset-0 z-10 cursor-pointer" 
+                    onClick={() => onFocus(block.id)} 
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 bg-gray-50 border border-gray-200 rounded-xl p-4 w-full max-w-md">
+                <input 
+                  type="text" 
+                  placeholder="YouTube URL" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  onKeyDown={(e) => {
+                     if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const url = e.currentTarget.value;
+                        const from = e.currentTarget.parentElement?.querySelector<HTMLInputElement>('input[name="from"]')?.value;
+                        const to = e.currentTarget.parentElement?.querySelector<HTMLInputElement>('input[name="to"]')?.value;
+                        if (url) {
+                          onUpdate(block.id, { content: JSON.stringify({ url, from, to }) });
+                        }
+                     }
+                  }}
+                />
+                <div className="flex gap-2">
+                  <input type="number" name="from" placeholder="From (seconds)" className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                  <input type="number" name="to" placeholder="To (seconds)" className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm" />
+                </div>
+                <button 
+                  className="w-full bg-blue-500 text-white rounded-md py-2 text-sm font-medium hover:bg-blue-600"
+                  onClick={(e) => {
+                    const parent = e.currentTarget.parentElement;
+                    const url = parent?.querySelector<HTMLInputElement>('input[type="text"]')?.value;
+                    const from = parent?.querySelector<HTMLInputElement>('input[name="from"]')?.value;
+                    const to = parent?.querySelector<HTMLInputElement>('input[name="to"]')?.value;
+                    if (url) {
+                      onUpdate(block.id, { content: JSON.stringify({ url, from, to }) });
+                    }
+                  }}
+                >
+                  Embed Video
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <div
             ref={contentRef}
@@ -932,8 +1014,8 @@ export default function BlockNode({
       </div>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm pointer-events-auto">
+      {mounted && showDeleteModal && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm pointer-events-auto font-figtree">
           <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Block</h3>
             <p className="text-gray-500 text-sm mb-6">Are you sure you want to delete this block? This action cannot be undone.</p>
@@ -955,7 +1037,8 @@ export default function BlockNode({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -108,7 +108,7 @@ export default function GlobalSearch() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] font-figtree">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { BlockType } from '../types';
-import { Type, Heading1, Heading2, Heading3, CheckSquare, Image as ImageIcon, Code, PenTool, Mic } from 'lucide-react';
+import { Type, Heading1, Heading2, Heading3, CheckSquare, Image as ImageIcon, Code, PenTool, Mic, Youtube } from 'lucide-react';
 
 interface SlashMenuProps {
   query: string;
@@ -20,6 +20,7 @@ const MENU_ITEMS = [
   { id: 'code', label: 'Code Block', icon: Code, description: 'Write syntax-highlighted code.' },
   { id: 'draw', label: 'Drawing Canvas', icon: PenTool, description: 'Freehand sketch.' },
   { id: 'audio', label: 'Audio Note', icon: Mic, description: 'Record a voice note.' },
+  { id: 'video-embed', label: 'Video Embed', icon: Youtube, description: 'Embed a youtube video with from and to.' },
 ];
 
 export default function SlashMenu({ query, onSelect, onClose }: SlashMenuProps) {
@@ -57,7 +58,7 @@ export default function SlashMenu({ query, onSelect, onClose }: SlashMenuProps) 
   if (filteredItems.length === 0) return null;
 
   return (
-    <div className="absolute left-0 top-full mt-1 w-72 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50 font-sans">
+    <div className="absolute left-0 top-full mt-1 w-72 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50 font-sans font-figtree">
       <div className="px-3 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
         Basic Blocks
       </div>

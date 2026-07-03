@@ -139,9 +139,9 @@ export default function Header() {
           <button
             onClick={() => {
               if (!showSettings) {
-                originalFontRef.current = fontFamily;
+                originalFontRef.current = fontFamily
               }
-              setShowSettings(!showSettings);
+              setShowSettings(!showSettings)
             }}
             className={`p-1.5 rounded-md transition-colors ${showSettings ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}
             title="Settings"
@@ -156,9 +156,9 @@ export default function Header() {
                 className="fixed inset-0 z-40"
                 onClick={() => {
                   if (originalFontRef.current) {
-                    setFontFamily(originalFontRef.current);
+                    setFontFamily(originalFontRef.current)
                   }
-                  setShowSettings(false);
+                  setShowSettings(false)
                 }}
               />
               <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 shadow-xl rounded-xl p-2 flex flex-col gap-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -166,11 +166,11 @@ export default function Header() {
                   <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
                     Typography
                   </span>
-                  <div 
+                  <div
                     className="max-h-36 overflow-y-auto custom-scrollbar flex flex-col rounded-md border border-gray-100 bg-gray-50 p-1 gap-0.5"
                     onMouseLeave={() => {
                       if (originalFontRef.current) {
-                        setFontFamily(originalFontRef.current);
+                        setFontFamily(originalFontRef.current)
                       }
                     }}
                   >
@@ -178,12 +178,12 @@ export default function Header() {
                       <button
                         key={font.value}
                         onClick={() => {
-                          originalFontRef.current = font.value;
-                          setFontFamily(font.value);
-                          setShowSettings(false); // Optionally auto-close on selection
+                          originalFontRef.current = font.value
+                          setFontFamily(font.value)
+                          setShowSettings(false) // Optionally auto-close on selection
                         }}
                         onMouseEnter={() => {
-                          setFontFamily(font.value);
+                          setFontFamily(font.value)
                         }}
                         className={`text-left text-xs px-2 py-1.5 rounded-sm hover:bg-gray-200/60 transition-colors ${fontFamily === font.value ? "bg-white shadow-sm font-semibold text-gray-900 border border-gray-200" : "text-gray-600 border border-transparent"}`}
                       >
