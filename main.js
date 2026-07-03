@@ -1,7 +1,8 @@
-const { app, BrowserWindow, ipcMain, protocol } = require("electron")
+const { app, BrowserWindow, ipcMain, protocol, shell } = require("electron")
 const path = require("path")
 const fs = require("fs")
 const crypto = require("crypto")
+const { syncToDrive } = require("./drive-sync")
 
 async function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -56,6 +57,10 @@ app.whenReady().then(() => {
     } else {
       event.returnValue = null
     }
+  })
+
+  ipcMain.handle('sync-to-drive', async (event) => {
+    return await syncToDrive()
   })
 
   createWindow()

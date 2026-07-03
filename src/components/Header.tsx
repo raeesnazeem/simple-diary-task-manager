@@ -51,15 +51,56 @@ export default function Header() {
     setViewMode,
     isRecordingAudio,
     setPendingPageTurn,
+    autoSyncEnabled,
+    setAutoSyncEnabled,
+    data,
   } = useDiaryStore()
   const [mounted, setMounted] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "success" | "error">("idle")
   const settingsRef = useRef<HTMLDivElement>(null)
   const originalFontRef = useRef(fontFamily)
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (mounted && autoSyncEnabled) {
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+      syncTimeoutRef.current = setTimeout(() => {
+        handleManualSync();
+      }, 5000); // 5 seconds debounce
+    }
+    return () => {
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    }
+  }, [data, autoSyncEnabled, mounted]);
+
+  const handleManualSync = async () => {
+    if (!window.electronAPI || !window.electronAPI.syncToDrive) return;
+    setIsSyncing(true);
+    setSyncStatus("syncing");
+    try {
+      const res = await window.electronAPI.syncToDrive();
+      if (res.success) {
+        setSyncStatus("success");
+      } else {
+        console.error("Sync error:", res.error);
+        setSyncStatus("error");
+      }
+    } catch (e) {
+      console.error("Sync caught error:", e);
+      setSyncStatus("error");
+    } finally {
+      setIsSyncing(false);
+      setTimeout(() => setSyncStatus("idle"), 3000);
+    }
+  };
 
   const handleDateChange = (newDate: string) => {
     if (isRecordingAudio) {
@@ -214,6 +255,22 @@ export default function Header() {
                     ))}
                   </div>
                 </div>
+
+                <div className="h-px bg-gray-100 my-1 w-full" />
+
+                <div className="flex flex-col gap-1 px-2 py-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                      Auto Save to Drive
+                    </span>
+                    <button 
+                      onClick={() => setAutoSyncEnabled(!autoSyncEnabled)}
+                      className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${autoSyncEnabled ? 'bg-green-500' : 'bg-gray-200'}`}
+                    >
+                      <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${autoSyncEnabled ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
+                    </button>
+                  </div>
+                </div>
               </div>
             </>
           )}
@@ -224,9 +281,21 @@ export default function Header() {
           <Cloud size={14} />
           <span>Synced locally</span>
         </div>
-        <button className="flex items-center space-x-1.5 text-xs text-gray-500 hover:text-gray-800 bg-white border border-gray-200 px-2.5 py-1.5 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
-          <Cloud size={14} />
-          <span>Sync to Google Drive</span>
+        <button 
+          onClick={handleManualSync}
+          disabled={isSyncing}
+          className={`flex items-center space-x-1.5 text-xs px-2.5 py-1.5 rounded-md shadow-sm border transition-colors ${
+            syncStatus === "success" 
+              ? "bg-green-50 border-green-200 text-green-700" 
+              : syncStatus === "error"
+              ? "bg-red-50 border-red-200 text-red-700"
+              : "bg-white border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+          }`}
+        >
+          <Cloud size={14} className={isSyncing ? "animate-pulse" : ""} />
+          <span>
+            {syncStatus === "syncing" ? "Syncing..." : syncStatus === "success" ? "Synced to Drive!" : syncStatus === "error" ? "Sync Failed" : "Sync to Google Drive"}
+          </span>
         </button>
       </div>
     </div>

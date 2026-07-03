@@ -37,3 +37,15 @@ pnpm-debug.log*
 # env files
 .env
 .env*.local
+
+# test scripts and local dumps
+dump.json
+test-store.js
+test-zustand.js
+
+# Google Drive credentials/tokens
+google-credentials.json
+google-tokens.json
+
+# TypeScript cache
+tsconfig.tsbuildinfo

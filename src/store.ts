@@ -47,6 +47,8 @@ interface DiaryState {
   deleteBlock: (date: string, id: string) => void;
   mergeBlockWithPrevious: (date: string, currentIndex: number) => void;
   reorderBlocks: (date: string, sourceIndex: number, destinationIndex: number) => void;
+  autoSyncEnabled: boolean;
+  setAutoSyncEnabled: (enabled: boolean) => void;
 }
 
 const createNewBlock = (type: BlockType, content: string = ''): Block => ({
@@ -70,12 +72,14 @@ export const useDiaryStore = create<DiaryState>()(
       activeBlockId: null,
       isRecordingAudio: false,
       pendingPageTurn: null,
+      autoSyncEnabled: false,
       setActiveDate: (date) => set({ activeDate: date, activeBlockId: null }),
       setFontFamily: (font) => set({ fontFamily: font }),
       setViewMode: (mode) => set({ viewMode: mode }),
       setActiveBlockId: (id) => set({ activeBlockId: id }),
       setIsRecordingAudio: (val) => set({ isRecordingAudio: val }),
       setPendingPageTurn: (date) => set({ pendingPageTurn: date }),
+      setAutoSyncEnabled: (enabled) => set({ autoSyncEnabled: enabled }),
 
       addBlock: (date, type, content = '', index) => set((state) => {
         const blocks = state.data[date] || [createNewBlock('text')];
@@ -173,6 +177,7 @@ export const useDiaryStore = create<DiaryState>()(
           ...persistedState,
           data: persistedState?.data || currentState.data,
           activeDate: persistedState?.activeDate || currentState.activeDate,
+          autoSyncEnabled: persistedState?.autoSyncEnabled ?? currentState.autoSyncEnabled,
         };
       },
     }

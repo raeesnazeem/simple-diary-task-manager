@@ -27,6 +27,7 @@ declare global {
       saveImage: (buffer: ArrayBuffer, extension: string) => Promise<string>;
       saveData: (data: string) => Promise<boolean>;
       loadDataSync: () => string | null;
+      syncToDrive: () => Promise<{ success: boolean; error?: string }>;
     };
   }
 }
