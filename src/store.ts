@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { temporal } from 'zundo';
 
+let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const electronStorage = {
   getItem: (name: string): string | null => {
@@ -16,10 +17,13 @@ const electronStorage = {
     return localStorage.getItem(name);
   },
   setItem: (name: string, value: string): void => {
-    if (typeof window !== 'undefined' && window.electronAPI && window.electronAPI.saveData) {
-      window.electronAPI.saveData(value).catch(console.error);
-    }
-    localStorage.setItem(name, value);
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      if (typeof window !== 'undefined' && window.electronAPI && window.electronAPI.saveData) {
+        window.electronAPI.saveData(value).catch(console.error);
+      }
+      localStorage.setItem(name, value);
+    }, 1500);
   },
   removeItem: (name: string): void => {
     localStorage.removeItem(name);

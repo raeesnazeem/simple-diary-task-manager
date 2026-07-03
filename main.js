@@ -14,7 +14,7 @@ async function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     },
   })
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   if (app.isPackaged) {
     const serve = (await import("electron-serve")).default

@@ -19,8 +19,8 @@ body {
   display: none;
 }
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 /* Paper styling */
@@ -162,4 +162,20 @@ body {
 }
 .animate-quick-fade {
   animation: quickFadeIn 0.3s ease-out forwards;
+}
+
+/* Custom scale pulse for icons */
+@keyframes scalePulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.animate-scale-pulse {
+  animation: scalePulse 0.75s ease-in-out infinite;
+  transform-origin: center;
 }

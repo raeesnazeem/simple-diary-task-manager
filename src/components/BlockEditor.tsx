@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react"
 import { useDiaryStore } from "../store"
 import BlockNode from "./BlockNode"
 import { format, parseISO } from "date-fns"
+import { Clock, Image as ImageIcon, Music, Bookmark, Youtube, CheckSquare, Code } from "lucide-react"
 
 interface BlockEditorProps {
   date?: string // If provided, renders this date instead of activeDate
@@ -24,6 +25,8 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
   } = useDiaryStore()
   const [mounted, setMounted] = useState(false)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [editedText, setEditedText] = useState<string | null>(null)
+  const [editedBlockId, setEditedBlockId] = useState<string | null>(null)
 
   const safeData = data || {}
   const safeActiveDate =
@@ -38,7 +41,27 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
     ) {
       addBlock(safeActiveDate, "text")
     }
+    
+    if (mounted && safeActiveDate) {
+      const saved = localStorage.getItem(`edited-${safeActiveDate}`)
+      setEditedText(saved ? saved : null)
+      const savedBlockId = localStorage.getItem(`edited-blockId-${safeActiveDate}`)
+      setEditedBlockId(savedBlockId ? savedBlockId : null)
+    }
   }, [safeActiveDate, mounted, safeData, addBlock])
+
+  const recordEdit = (blockId?: string) => {
+    const todayStr = format(new Date(), 'yyyy-MM-dd')
+    if (safeActiveDate < todayStr) {
+      const timeStr = `edited - on ${format(new Date(), "MMM d, yyyy 'and' h:mm a")}`
+      localStorage.setItem(`edited-${safeActiveDate}`, timeStr)
+      setEditedText(timeStr)
+      if (blockId) {
+        localStorage.setItem(`edited-blockId-${safeActiveDate}`, blockId)
+        setEditedBlockId(blockId)
+      }
+    }
+  }
 
   if (!mounted)
     return (
@@ -50,6 +73,17 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
     )
 
   const blocks = safeData[safeActiveDate] || []
+
+  const hasReminder = false
+  const hasBookmark = false
+  const hasImage = blocks.some((b) => b.type === "image")
+  const hasAudio = blocks.some((b) => b.type === "audio")
+  const hasYoutube = blocks.some((b) => b.type === "video-embed")
+  const hasCode = blocks.some((b) => b.type === "code")
+  const todoBlocks = blocks.filter((b) => b.type === "todo")
+  const hasTodo = todoBlocks.length > 0
+  const hasUncheckedTodo = todoBlocks.some((b) => !b.checked)
+
 
   const handleKeyDownDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key === "ArrowUp" && index > 0) {
@@ -79,6 +113,7 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
             }
           }
           addBlock(safeActiveDate, "text")
+          recordEdit()
           setTimeout(() => {
             const newBlocks = useDiaryStore.getState().data[safeActiveDate]
             if (newBlocks && newBlocks.length > 0) {
@@ -124,6 +159,50 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
             app
           </span>
         </div>
+        
+        <div className="absolute bottom-4 left-0 flex gap-3 pointer-events-none select-none">
+          <Clock 
+            size={16} 
+            strokeWidth={2} 
+            className={hasReminder ? "text-purple-500" : "text-gray-400 opacity-50"} 
+          />
+          <ImageIcon 
+            size={16} 
+            strokeWidth={2} 
+            className={hasImage ? "text-blue-500" : "text-gray-400 opacity-50"} 
+          />
+          <Music 
+            size={16} 
+            strokeWidth={2} 
+            className={hasAudio ? "text-black" : "text-gray-400 opacity-50"} 
+          />
+          <Bookmark 
+            size={16} 
+            strokeWidth={2} 
+            className={hasBookmark ? "text-amber-800" : "text-gray-400 opacity-50"}
+            fill={hasBookmark ? "currentColor" : "none"}
+          />
+          <Youtube 
+            size={16} 
+            strokeWidth={2} 
+            className={hasYoutube ? "text-red-500" : "text-gray-400 opacity-50"} 
+          />
+          <CheckSquare
+            size={16}
+            strokeWidth={2}
+            className={
+              hasTodo 
+                ? (hasUncheckedTodo ? "text-yellow-500 animate-scale-pulse" : "text-yellow-500") 
+                : "text-gray-400 opacity-50"
+            }
+          />
+          <Code 
+            size={16} 
+            strokeWidth={2} 
+            className={hasCode ? "text-green-500" : "text-gray-400 opacity-50"} 
+          />
+        </div>
+
         <div className="flex flex-col items-end pb-4 pr-2 select-none font-sans pointer-events-none">
           <div className="text-6xl font-black text-gray-800 leading-none tracking-wide">
             {dayOfMonth}
@@ -134,15 +213,20 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
           </div>
         </div>
       </div>
+
       {blocks.map((block, index) => (
-        <BlockNode
-          key={block.id}
-          block={block}
-          index={index}
-          isActive={activeBlockId === block.id}
-          onUpdate={(id, updates) => updateBlock(safeActiveDate, id, updates)}
+        <React.Fragment key={block.id}>
+          <BlockNode
+            block={block}
+            index={index}
+            isActive={activeBlockId === block.id}
+            onUpdate={(id, updates) => {
+              updateBlock(safeActiveDate, id, updates)
+              recordEdit(id)
+            }}
           onAddBlock={(type, idx, content = "") => {
             addBlock(safeActiveDate, type, content, idx)
+            recordEdit()
             // We can't immediately set activeBlockId because the block isn't rendered yet,
             // but it'll be handled by the effect inside BlockNode ideally, or by relying on tab order.
             // For a perfect implementation, we'd wait for render and focus.
@@ -154,22 +238,31 @@ export default function BlockEditor({ date: dateProp }: BlockEditorProps = {}) {
           }}
           onDelete={(id) => {
             deleteBlock(safeActiveDate, id)
+            recordEdit()
             if (index > 0) {
               setActiveBlockId(blocks[index - 1].id)
             }
           }}
           onMergeWithPrev={(idx) => {
             mergeBlockWithPrevious(safeActiveDate, idx)
+            recordEdit()
             setActiveBlockId(blocks[idx - 1].id)
           }}
           onFocus={(id) => setActiveBlockId(id)}
           onKeyDownDown={handleKeyDownDown}
           draggedIndex={draggedIndex}
           setDraggedIndex={setDraggedIndex}
-          onReorder={(sourceIdx, destIdx) =>
+          onReorder={(sourceIdx, destIdx) => {
             reorderBlocks(safeActiveDate, sourceIdx, destIdx)
-          }
+            recordEdit()
+          }}
         />
+        {editedBlockId === block.id && editedText && (
+          <div className="font-figtree text-xs text-amber-700 italic bg-amber-50/80 backdrop-blur-sm py-1 px-3 rounded-full shadow-sm border border-amber-200/60 pointer-events-none select-none self-end -mt-3 mr-4 z-10 transition-all opacity-100">
+            {editedText}
+          </div>
+        )}
+      </React.Fragment>
       ))}
     </div>
   )

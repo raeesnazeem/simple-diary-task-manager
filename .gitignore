@@ -49,3 +49,18 @@ google-tokens.json
 
 # TypeScript cache
 tsconfig.tsbuildinfo
+
+# IDE and OS
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test scripts
+test-*.js
+test-*.ts

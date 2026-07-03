@@ -3,7 +3,7 @@ const http = require("http")
 const url = require("url")
 const fs = require("fs")
 const path = require("path")
-const { shell, app } = require("electron")
+const { shell, app, nativeImage } = require("electron")
 require("dotenv").config()
 
 const SCOPES = ["https://www.googleapis.com/auth/drive.file"]
@@ -177,10 +177,36 @@ async function syncToDrive() {
 
       const localImages = fs.readdirSync(imagesDir)
       for (const img of localImages) {
-        if (!existingImages.has(img) && img.endsWith(".png")) {
+        if (!existingImages.has(img) && !img.startsWith('.')) {
+          const isImage = img.match(/\.(png|jpe?g|webp|gif)$/i);
+          const isAudio = img.endsWith('.webm');
+          
+          if (!isImage && !isAudio) continue;
+
+          let mediaBody;
+          let mimeType;
+
+          if (isImage && nativeImage) {
+            const image = nativeImage.createFromPath(path.join(imagesDir, img));
+            if (!image.isEmpty()) {
+              const compressedBuffer = image.toJPEG(50); // compress to 50% quality JPEG
+              const { PassThrough } = require('stream');
+              const bufferStream = new PassThrough();
+              bufferStream.end(compressedBuffer);
+              mediaBody = bufferStream;
+              mimeType = "image/jpeg";
+            } else {
+              mediaBody = fs.createReadStream(path.join(imagesDir, img));
+              mimeType = "application/octet-stream";
+            }
+          } else {
+            mediaBody = fs.createReadStream(path.join(imagesDir, img));
+            mimeType = isAudio ? "audio/webm" : "application/octet-stream";
+          }
+
           const media = {
-            mimeType: "image/png",
-            body: fs.createReadStream(path.join(imagesDir, img)),
+            mimeType: mimeType,
+            body: mediaBody,
           }
           await drive.files.create({
             resource: {

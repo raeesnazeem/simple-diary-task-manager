@@ -4,6 +4,7 @@ import Header from "../src/components/Header"
 import BlockEditor from "../src/components/BlockEditor"
 import PageWithTurn from "../src/components/PageWithTurn"
 import GlobalSearch from "../src/components/GlobalSearch"
+import CalendarModal from "../src/components/CalendarModal"
 import { useDiaryStore } from "../src/store"
 import { format, addDays, subDays, parseISO } from "date-fns"
 import { useEffect, useState, useRef } from "react"
@@ -20,6 +21,8 @@ export default function Home() {
   const prevDateRef = useRef(safeActiveDate);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const leftScrollRef = useRef<HTMLDivElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const scrollLeftBy = (amount: number) => {
     if (leftScrollRef.current) {
@@ -78,6 +81,12 @@ export default function Home() {
       }
 
       if (isInput) return;
+
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'g') {
+        e.preventDefault();
+        setIsCalendarOpen(true);
+        return;
+      }
 
       if (e.key === 'ArrowRight') {
         handleDateChange(format(addDays(parseISO(safeActiveDate), viewMode === 'double' ? 2 : 1), 'yyyy-MM-dd'));
@@ -211,6 +220,24 @@ export default function Home() {
       </div>
 
       <GlobalSearch />
+      <CalendarModal 
+        isOpen={isCalendarOpen} 
+        onClose={() => setIsCalendarOpen(false)} 
+        onSelectDate={handleDateChange} 
+        currentDate={safeActiveDate} 
+      />
+      <input 
+        type="date" 
+        ref={dateInputRef}
+        className="absolute w-0 h-0 opacity-0 pointer-events-none"
+        onChange={(e) => {
+          if (e.target.value) {
+            handleDateChange(e.target.value);
+            // Reset value so selecting the same date again still triggers onChange if needed
+            // e.target.value = ''; // actually not needed since we navigate
+          }
+        }}
+      />
     </div>
   )
 }

@@ -24,7 +24,7 @@ export default function GlobalSearch() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
         e.preventDefault();
         setIsOpen(true);
       } else if (e.key === 'Escape' && isOpen) {

@@ -14,15 +14,9 @@ import { format, addDays, subDays, parseISO } from "date-fns"
 const FONTS = [
   { value: "font-kalam", label: "Kalam" },
   { value: "font-architects", label: "Architects Daughter" },
-  { value: "font-inter", label: "Inter" },
-  { value: "font-instrument-sans", label: "Instrument Sans" },
   { value: "font-figtree", label: "Figtree" },
   { value: "font-urbanist", label: "Urbanist" },
-  { value: "font-instrument-serif", label: "Instrument Serif" },
-  { value: "font-newsreader", label: "Newsreader" },
-  { value: "font-plus-jakarta", label: "Plus Jakarta Sans" },
   { value: "font-geist-mono", label: "Geist Mono" },
-  { value: "font-charter", label: "Charter" },
   { value: "font-sn-pro", label: "SN Pro" },
   { value: "font-caveat", label: "Caveat" },
   { value: "font-patrick-hand", label: "Patrick Hand" },
@@ -166,17 +160,40 @@ export default function Header() {
       <div className="flex items-center space-x-6" style={{ transform: 'scale(1.1)', transformOrigin: 'right center' }}>
         {/* Search shortcut */}
         <button
-          className="flex items-center space-x-2 text-gray-400 hover:text-gray-600 transition-colors group"
-          title="Search (Cmd+K)"
+          className="flex items-center text-gray-400 hover:text-gray-600 transition-all duration-200 group h-7"
+          title="Search (Cmd+F)"
         >
-          <Search size={16} />
-          <span className="text-xs font-medium bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200 group-hover:bg-gray-200 transition-colors">
-            Cmd K
-          </span>
+          <Search size={16} className="group-hover:scale-110 transition-transform duration-200" />
         </button>
 
+        {/* Sync Controls Group */}
+        <div className="flex items-center space-x-2">
+          {/* Sync status */}
+          <div className="flex items-center space-x-1.5 text-[11px] text-green-600 font-medium bg-green-50/80 px-3 h-7 rounded-full border border-green-300 shadow-sm">
+            <Cloud size={14} className="text-green-500" />
+            <span>Synced locally</span>
+          </div>
+          
+          <button 
+            onClick={handleManualSync}
+            disabled={isSyncing}
+            className={`flex items-center space-x-1.5 text-[11px] font-semibold px-3 h-7 rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.05)] border transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
+              syncStatus === "success" 
+                ? "bg-green-50 border-green-400 text-green-700" 
+                : syncStatus === "error"
+                ? "bg-red-50 border-red-200 text-red-700"
+                : "bg-white border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 hover:shadow-md"
+            }`}
+          >
+            <Cloud size={14} className={isSyncing ? "animate-pulse" : ""} />
+            <span>
+              {syncStatus === "syncing" ? "Syncing..." : syncStatus === "success" ? "Synced to Drive!" : syncStatus === "error" ? "Sync Failed" : "Sync to Google Drive"}
+            </span>
+          </button>
+        </div>
+
         {/* Settings Dropdown */}
-        <div className="relative flex items-center">
+        <div className="relative flex items-center h-7">
           <button
             onClick={() => {
               if (!showSettings) {
@@ -184,10 +201,10 @@ export default function Header() {
               }
               setShowSettings(!showSettings)
             }}
-            className={`p-1.5 rounded-md transition-colors ${showSettings ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}
+            className={`w-7 h-7 flex items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${showSettings ? "bg-gray-200 text-gray-900 shadow-inner" : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"}`}
             title="Settings"
           >
-            <Settings size={18} />
+            <Settings size={16} />
           </button>
 
           {showSettings && (
@@ -275,28 +292,6 @@ export default function Header() {
             </>
           )}
         </div>
-
-        {/* Sync status */}
-        <div className="flex items-center space-x-2 text-xs text-green-600 font-medium">
-          <Cloud size={14} />
-          <span>Synced locally</span>
-        </div>
-        <button 
-          onClick={handleManualSync}
-          disabled={isSyncing}
-          className={`flex items-center space-x-1.5 text-xs px-2.5 py-1.5 rounded-md shadow-sm border transition-colors ${
-            syncStatus === "success" 
-              ? "bg-green-50 border-green-200 text-green-700" 
-              : syncStatus === "error"
-              ? "bg-red-50 border-red-200 text-red-700"
-              : "bg-white border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-gray-50"
-          }`}
-        >
-          <Cloud size={14} className={isSyncing ? "animate-pulse" : ""} />
-          <span>
-            {syncStatus === "syncing" ? "Syncing..." : syncStatus === "success" ? "Synced to Drive!" : syncStatus === "error" ? "Sync Failed" : "Sync to Google Drive"}
-          </span>
-        </button>
       </div>
     </div>
   )
