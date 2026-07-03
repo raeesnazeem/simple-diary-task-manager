@@ -80,15 +80,15 @@ export default function Home() {
       if (isInput) return;
 
       if (e.key === 'ArrowRight') {
-        handleDateChange(format(addDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'));
+        handleDateChange(format(addDays(parseISO(safeActiveDate), viewMode === 'double' ? 2 : 1), 'yyyy-MM-dd'));
       } else if (e.key === 'ArrowLeft') {
-        handleDateChange(format(subDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'));
+        handleDateChange(format(subDays(parseISO(safeActiveDate), viewMode === 'double' ? 2 : 1), 'yyyy-MM-dd'));
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [safeActiveDate, setActiveDate, isRecordingAudio, setPendingPageTurn]);
+  }, [safeActiveDate, setActiveDate, isRecordingAudio, setPendingPageTurn, viewMode]);
 
   return (
     <div 
@@ -139,7 +139,7 @@ export default function Home() {
         ) : (
           <main className="flex-1 overflow-hidden w-full py-10 px-8 flex items-center justify-center relative group">
             <button
-              onClick={() => handleDateChange(format(subDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'))}
+              onClick={() => handleDateChange(format(subDays(parseISO(safeActiveDate), 2), 'yyyy-MM-dd'))}
               className="absolute left-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
               title="Previous Day"
             >
@@ -198,7 +198,7 @@ export default function Home() {
               />
             </div>
             <button
-              onClick={() => handleDateChange(format(addDays(parseISO(safeActiveDate), 1), 'yyyy-MM-dd'))}
+              onClick={() => handleDateChange(format(addDays(parseISO(safeActiveDate), 2), 'yyyy-MM-dd'))}
               className="absolute right-8 p-4 rounded-full bg-white/50 hover:bg-white text-gray-400 hover:text-gray-800 shadow-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
               title="Next Day"
             >
