@@ -9,7 +9,16 @@ import {
   Instrument_Serif,
   Newsreader,
   Plus_Jakarta_Sans,
-  Kalam
+  Kalam,
+  Patrick_Hand,
+  Handlee,
+  Shadows_Into_Light,
+  Neucha,
+  Permanent_Marker,
+  Homemade_Apple,
+  Nanum_Pen_Script,
+  Indie_Flower,
+  Gochi_Hand
 } from "next/font/google";
 import "./globals.css";
 
@@ -23,6 +32,15 @@ const instrumentSerif = Instrument_Serif({ weight: "400", subsets: ["latin"], va
 const newsreader = Newsreader({ subsets: ["latin"], variable: '--font-newsreader', adjustFontFallback: false });
 const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: '--font-plus-jakarta' });
 const kalam = Kalam({ weight: ["300", "400", "700"], subsets: ["latin"], variable: '--font-kalam' });
+const patrickHand = Patrick_Hand({ weight: "400", subsets: ["latin"], variable: '--font-patrick-hand', adjustFontFallback: false });
+const handlee = Handlee({ weight: "400", subsets: ["latin"], variable: '--font-handlee', adjustFontFallback: false });
+const shadowsIntoLight = Shadows_Into_Light({ weight: "400", subsets: ["latin"], variable: '--font-shadows-into-light', adjustFontFallback: false });
+const neucha = Neucha({ weight: "400", subsets: ["latin"], variable: '--font-neucha', adjustFontFallback: false });
+const permanentMarker = Permanent_Marker({ weight: "400", subsets: ["latin"], variable: '--font-permanent-marker', adjustFontFallback: false });
+const homemadeApple = Homemade_Apple({ weight: "400", subsets: ["latin"], variable: '--font-homemade-apple', adjustFontFallback: false });
+const nanumPenScript = Nanum_Pen_Script({ weight: "400", subsets: ["latin"], variable: '--font-nanum-pen-script', adjustFontFallback: false });
+const indieFlower = Indie_Flower({ weight: "400", subsets: ["latin"], variable: '--font-indie-flower', adjustFontFallback: false });
+const gochiHand = Gochi_Hand({ weight: "400", subsets: ["latin"], variable: '--font-gochi-hand', adjustFontFallback: false });
 
 export const metadata: Metadata = {
   title: "Simple Diary",
@@ -36,7 +54,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${caveat.variable} ${architectsDaughter.variable} ${instrumentSans.variable} ${figtree.variable} ${urbanist.variable} ${instrumentSerif.variable} ${newsreader.variable} ${plusJakarta.variable} ${kalam.variable} font-figtree antialiased`}>
+      <body className={`${inter.variable} ${caveat.variable} ${architectsDaughter.variable} ${instrumentSans.variable} ${figtree.variable} ${urbanist.variable} ${instrumentSerif.variable} ${newsreader.variable} ${plusJakarta.variable} ${kalam.variable} ${patrickHand.variable} ${handlee.variable} ${shadowsIntoLight.variable} ${neucha.variable} ${permanentMarker.variable} ${homemadeApple.variable} ${nanumPenScript.variable} ${indieFlower.variable} ${gochiHand.variable} font-figtree antialiased`}>
         {children}
       </body>
     </html>

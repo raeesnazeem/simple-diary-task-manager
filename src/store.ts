@@ -1,5 +1,29 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+
+
+const electronStorage = {
+  getItem: (name: string): string | null => {
+    if (typeof window !== 'undefined' && window.electronAPI && window.electronAPI.loadDataSync) {
+      try {
+        const data = window.electronAPI.loadDataSync();
+        if (data) return data;
+      } catch (e) {
+        console.error('Failed to load from electron API', e);
+      }
+    }
+    return localStorage.getItem(name);
+  },
+  setItem: (name: string, value: string): void => {
+    if (typeof window !== 'undefined' && window.electronAPI && window.electronAPI.saveData) {
+      window.electronAPI.saveData(value).catch(console.error);
+    }
+    localStorage.setItem(name, value);
+  },
+  removeItem: (name: string): void => {
+    localStorage.removeItem(name);
+  }
+};
 import { format } from 'date-fns';
 import { Block, BlockType, DiaryData } from './types';
 
@@ -140,6 +164,7 @@ export const useDiaryStore = create<DiaryState>()(
     }),
     {
       name: 'simple-diary-storage',
+      storage: createJSONStorage(() => electronStorage),
       merge: (persistedState: any, currentState: DiaryState) => {
         return {
           ...currentState,

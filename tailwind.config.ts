@@ -21,6 +21,15 @@ const config: Config = {
         'geist-mono': ['Geist Mono', 'monospace'],
         charter: ['Charter', 'Bitstream Charter', 'serif'],
         'sn-pro': ['SN Pro', 'sans-serif'],
+        'patrick-hand': ['var(--font-patrick-hand)', 'cursive'],
+        handlee: ['var(--font-handlee)', 'cursive'],
+        'shadows-into-light': ['var(--font-shadows-into-light)', 'cursive'],
+        neucha: ['var(--font-neucha)', 'cursive'],
+        'permanent-marker': ['var(--font-permanent-marker)', 'cursive'],
+        'homemade-apple': ['var(--font-homemade-apple)', 'cursive'],
+        'nanum-pen-script': ['var(--font-nanum-pen-script)', 'cursive'],
+        'indie-flower': ['var(--font-indie-flower)', 'cursive'],
+        'gochi-hand': ['var(--font-gochi-hand)', 'cursive'],
       },
       colors: {
         paper: {

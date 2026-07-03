@@ -469,8 +469,11 @@ export default function BlockNode({
     e.target.setPointerCapture(e.pointerId);
     
     const rect = canvasRef.current.getBoundingClientRect();
-    const absX = e.clientX - rect.left;
-    const absY = e.clientY - rect.top;
+    const scaleX = canvasRef.current.width / rect.width;
+    const scaleY = canvasRef.current.height / rect.height;
+    
+    const absX = (e.clientX - rect.left) * scaleX;
+    const absY = (e.clientY - rect.top) * scaleY;
     
     const x = absX / canvasWidth;
     const y = absY / canvasHeight;
@@ -495,8 +498,11 @@ export default function BlockNode({
     if (!isDrawing || block.type !== 'draw' || !canvasRef.current) return;
     
     const rect = canvasRef.current.getBoundingClientRect();
-    const absX = e.clientX - rect.left;
-    const absY = e.clientY - rect.top;
+    const scaleX = canvasRef.current.width / rect.width;
+    const scaleY = canvasRef.current.height / rect.height;
+    
+    const absX = (e.clientX - rect.left) * scaleX;
+    const absY = (e.clientY - rect.top) * scaleY;
     
     const x = absX / canvasWidth;
     const y = absY / canvasHeight;
@@ -526,7 +532,8 @@ export default function BlockNode({
       existingStrokes = block.content ? JSON.parse(block.content) : [];
     } catch(err) {}
     
-    const newStrokes = [...existingStrokes, currentStrokeRef.current];
+    const newStroke = { tool: drawTool, size: drawSize, points: currentStrokeRef.current };
+    const newStrokes = [...existingStrokes, newStroke];
     onUpdate(block.id, { content: JSON.stringify(newStrokes) });
     currentStrokeRef.current = [];
   };
@@ -620,7 +627,7 @@ export default function BlockNode({
         setIsDragHandleActive(false);
         if (setDraggedIndex) setDraggedIndex(null);
         
-        if (draggedIndex !== null && draggedIndex !== index && onReorder) {
+        if (draggedIndex !== null && draggedIndex !== undefined && draggedIndex !== index && onReorder) {
           let dest = index;
           if (pos === 'bottom') dest += 1;
           if (draggedIndex < dest) dest -= 1;
@@ -824,11 +831,11 @@ export default function BlockNode({
           </div>
         ) : block.type === 'draw' ? (
           <div 
-            className="relative mt-2 mb-4 group/draw outline-none inline-block border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/50"
+            className="relative mt-2 mb-4 group/draw outline-none block w-full border-2 border-dashed border-gray-200 rounded-lg bg-transparent"
             tabIndex={0}
             onKeyDown={handleKeyDown}
             onFocus={() => onFocus(block.id)}
-            style={{ width: canvasWidth, height: canvasHeight }}
+            style={{ width: block.width ? canvasWidth : '100%', height: canvasHeight }}
           >
             <canvas
               ref={canvasRef}

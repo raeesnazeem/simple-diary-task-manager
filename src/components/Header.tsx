@@ -25,6 +25,15 @@ const FONTS = [
   { value: "font-charter", label: "Charter" },
   { value: "font-sn-pro", label: "SN Pro" },
   { value: "font-caveat", label: "Caveat" },
+  { value: "font-patrick-hand", label: "Patrick Hand" },
+  { value: "font-handlee", label: "Handlee" },
+  { value: "font-shadows-into-light", label: "Shadows Into Light" },
+  { value: "font-neucha", label: "Neucha" },
+  { value: "font-permanent-marker", label: "Permanent Marker" },
+  { value: "font-homemade-apple", label: "Homemade Apple" },
+  { value: "font-nanum-pen-script", label: "Nanum Pen Script" },
+  { value: "font-indie-flower", label: "Indie Flower" },
+  { value: "font-gochi-hand", label: "Gochi Hand" },
 ]
 
 const LAYOUTS = [
@@ -46,6 +55,7 @@ export default function Header() {
   const [mounted, setMounted] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const settingsRef = useRef<HTMLDivElement>(null)
+  const originalFontRef = useRef(fontFamily)
 
   useEffect(() => {
     setMounted(true)
@@ -127,7 +137,12 @@ export default function Header() {
         {/* Settings Dropdown */}
         <div className="relative flex items-center">
           <button
-            onClick={() => setShowSettings(!showSettings)}
+            onClick={() => {
+              if (!showSettings) {
+                originalFontRef.current = fontFamily;
+              }
+              setShowSettings(!showSettings);
+            }}
             className={`p-1.5 rounded-md transition-colors ${showSettings ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}
             title="Settings"
           >
@@ -139,20 +154,36 @@ export default function Header() {
               {/* Transparent overlay for click-outside that doesn't break native OS selects */}
               <div
                 className="fixed inset-0 z-40"
-                onClick={() => setShowSettings(false)}
+                onClick={() => {
+                  if (originalFontRef.current) {
+                    setFontFamily(originalFontRef.current);
+                  }
+                  setShowSettings(false);
+                }}
               />
               <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 shadow-xl rounded-xl p-2 flex flex-col gap-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="flex flex-col gap-1 px-2 py-1.5">
                   <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
                     Typography
                   </span>
-                  <div className="max-h-36 overflow-y-auto custom-scrollbar flex flex-col rounded-md border border-gray-100 bg-gray-50 p-1 gap-0.5">
+                  <div 
+                    className="max-h-36 overflow-y-auto custom-scrollbar flex flex-col rounded-md border border-gray-100 bg-gray-50 p-1 gap-0.5"
+                    onMouseLeave={() => {
+                      if (originalFontRef.current) {
+                        setFontFamily(originalFontRef.current);
+                      }
+                    }}
+                  >
                     {FONTS.map((font) => (
                       <button
                         key={font.value}
                         onClick={() => {
-                          setFontFamily(font.value)
-                          setShowSettings(false) // Optionally auto-close on selection
+                          originalFontRef.current = font.value;
+                          setFontFamily(font.value);
+                          setShowSettings(false); // Optionally auto-close on selection
+                        }}
+                        onMouseEnter={() => {
+                          setFontFamily(font.value);
                         }}
                         className={`text-left text-xs px-2 py-1.5 rounded-sm hover:bg-gray-200/60 transition-colors ${fontFamily === font.value ? "bg-white shadow-sm font-semibold text-gray-900 border border-gray-200" : "text-gray-600 border border-transparent"}`}
                       >

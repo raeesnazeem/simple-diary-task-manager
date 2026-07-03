@@ -43,6 +43,21 @@ app.whenReady().then(() => {
     return `diary://${filename}`
   })
 
+  ipcMain.handle('save-data', async (event, data) => {
+    const dataPath = path.join(app.getPath('userData'), 'diary-data.json')
+    fs.writeFileSync(dataPath, data, 'utf-8')
+    return true
+  })
+
+  ipcMain.on('load-data-sync', (event) => {
+    const dataPath = path.join(app.getPath('userData'), 'diary-data.json')
+    if (fs.existsSync(dataPath)) {
+      event.returnValue = fs.readFileSync(dataPath, 'utf-8')
+    } else {
+      event.returnValue = null
+    }
+  })
+
   createWindow()
 
   app.on("activate", function () {
