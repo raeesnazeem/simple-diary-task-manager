@@ -1,0 +1,5 @@
+◇ injected env (2) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+(node:51335) UnhandledPromiseRejectionWarning: Error: Failed to load image from path '/Users/ikkaavaforever/Documents/Work/electron-js-projects/diary/simple-diary-task-manager/dist/mac/itsNoted.app/Contents/Resources/app.asar/public/appstore.png'
+    at /Users/ikkaavaforever/Documents/Work/electron-js-projects/diary/simple-diary-task-manager/dist/mac/itsNoted.app/Contents/Resources/app.asar/main.js:70:14
+(Use `itsNoted --trace-warnings ...` to show where the warning was created)
+(node:51335) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 1)

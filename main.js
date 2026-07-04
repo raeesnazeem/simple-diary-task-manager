@@ -3,7 +3,19 @@ const path = require("path")
 const fs = require("fs")
 const crypto = require("crypto")
 const { syncToDrive } = require("./drive-sync")
-
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "app",
+    privileges: {
+      standard: true,
+      secure: true,
+      allowServiceWorkers: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      stream: true
+    },
+  },
+])
 async function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1194,
@@ -20,15 +32,22 @@ async function createWindow() {
   // mainWindow.webContents.openDevTools()
 
   if (app.isPackaged) {
-    const serve = (await import("electron-serve")).default
-    const loadURL = serve({ directory: "out" })
-    loadURL(mainWindow)
+    mainWindow.loadURL("app://-/index.html")
   } else {
     mainWindow.loadURL("http://localhost:3004")
   }
 }
 
 app.whenReady().then(() => {
+  protocol.registerFileProtocol("app", (request, callback) => {
+    const urlPath = request.url.substr(7) // remove 'app://-/'
+    let filePath = path.join(__dirname, "out", urlPath)
+    if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(__dirname, "out", "index.html")
+    }
+    callback({ path: filePath })
+  })
+
   protocol.registerFileProtocol("diary", (request, callback) => {
     const url = request.url.substr(8)
     const imagesDir = path.join(app.getPath("userData"), "images")

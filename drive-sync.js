@@ -4,7 +4,7 @@ const url = require("url")
 const fs = require("fs")
 const path = require("path")
 const { shell, app, nativeImage } = require("electron")
-require("dotenv").config()
+require("dotenv").config({ path: path.join(__dirname, ".env") })
 
 const SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 const TOKENS_PATH = path.join(app.getPath("userData"), "google-tokens.json")

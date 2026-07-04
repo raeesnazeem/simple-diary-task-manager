@@ -998,7 +998,7 @@ export default function BlockNode({
                       let videoId = '';
                       if (url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
                       else if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
-                      let src = `https://www.youtube.com/embed/${videoId}?`;
+                      let src = `https://www.youtube-nocookie.com/embed/${videoId}?`;
                       if (data.from) src += `start=${data.from}&`;
                       if (data.to) src += `end=${data.to}&`;
                       return src;
