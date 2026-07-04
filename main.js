@@ -89,6 +89,18 @@ app.whenReady().then(() => {
     app.dock.setIcon(path.join(__dirname, "public", "appstore.png"))
   }
 
+  try {
+    fs.watch(app.getPath("userData"), (eventType, filename) => {
+      if (filename === "diary-data.json" && eventType === "change") {
+        BrowserWindow.getAllWindows().forEach(win => {
+          win.webContents.send("external-data-changed")
+        })
+      }
+    })
+  } catch (err) {
+    console.error("File watch error:", err)
+  }
+
   createWindow()
 
   app.on("activate", function () {

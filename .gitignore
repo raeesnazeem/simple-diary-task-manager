@@ -64,3 +64,6 @@ ehthumbs.db
 # Test scripts
 test-*.js
 test-*.ts
+
+# Agents
+.agents/

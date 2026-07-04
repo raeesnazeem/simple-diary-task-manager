@@ -219,3 +219,11 @@ export const useDiaryStore = create<DiaryState>()(
     { limit: 50 },
   ),
 )
+
+if (typeof window !== "undefined" && (window as any).electronAPI?.onExternalDataChanged) {
+  (window as any).electronAPI.onExternalDataChanged(() => {
+    if (useDiaryStore.persist && typeof useDiaryStore.persist.rehydrate === "function") {
+      useDiaryStore.persist.rehydrate()
+    }
+  })
+}
